@@ -1,0 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+export default function Home() {
+    return (_jsxs("div", { className: "max-w-3xl mx-auto space-y-6", children: [_jsx("h2", { className: "text-3xl font-bold text-stone-800", children: "A cookie from every country" }), _jsx("p", { className: "text-stone-700 leading-relaxed", children: "Welcome to Cookie Accord. Explore traditional cookies from around the world, share your own, and learn the sweet stories behind each recipe." }), _jsxs("div", { className: "flex gap-4 mt-8", children: [_jsx("button", { className: "px-5 py-2 rounded-xl bg-amber-600 text-white hover:bg-amber-700", children: "View Cookies" }), _jsx("button", { className: "px-5 py-2 rounded-xl bg-white border border-amber-300 text-amber-800 hover:bg-amber-50", children: "Add a Cookie" })] })] }));
+}

@@ -1,0 +1,200 @@
+Afghanistan_Kulcha-e-Khataye.jpg
+Albania_Kurabie.jpg
+Algeria_Ghribia.jpg
+Andorra_Carquinyolis.jpg
+Angola_Queijadinhas.jpg
+AntiguaBarbuda_CoconutDrops.jpg
+Argentina_Alfajores.jpg
+Armenia_Gata.jpg
+Australia_AnzacBiscuit.jpg
+Australia_IndigTrad_MyrtleLemon
+Austria_Vanillekipferl.jpg
+Azerbaijan_Shekerbura.jpg
+Bahamas_CoconutRumCookie.jpg
+Bahrain_DateManoul.jpg
+Bangladesh_NarkelNaru.jpg
+Barbados_CoconutSugarCakes.jpg
+Belarus_Pryanik.jpg
+Belgium_Speculoos.jpg
+Belize_CoconutTarts.jpg
+Benin_Beignet.jpg
+Bhutan_Khapse.jpg
+Bolivia_Rosquetes.jpg
+BosniaHerzegovina_Hurmasie.jpg
+Botswana_Magwinya.jpg
+Brazil_BiscoitodePolviho.jpg
+Brunei_KuihSapit.jpg
+Bulgaria_Kurabiiki.jpg
+Burkina Faso_Beignets.jpg
+Burundi_GateausalaBanane.jpg
+CaboVerde_BolachasdeCoco.jpg
+Cambodia_NumPiah.jpg
+Cameroon_GateaudeMil.jpg
+Canada_NanainoBars.jpg
+Central African Republic_BeignetsdeManioc.jpg
+Chad_GalettesdeMil.jpg
+Chile_Alfajores.jpg
+China_AlmondCookie.jpg
+Colombia_Polvorosas.png
+Comoros_Kaak.jpg
+CongoDemocraticRepublic_MakayabuBeignets.jpg
+CongoRepublic_GalettesAfricianes.jpg
+CostaRica_BiscochosTicos.jpg
+Croatia_Paprenjaci.jpg
+Cuba_TorticasdeMoron.jpg
+Cyprus_Koulourakia.jpg
+Czechia_LineckeCukrovi.jpg
+C?te d?Ivoire_BeignetsIvoiriens.jpg
+Denmark_Vaniljekranse.jpg
+Djibouti_KacKac.jpg
+Dominican Republic_PolvoronesDominicanos.jpg
+Dominica_CoconutDrops.jpg
+Ecuador_GalletasdeAcenayCoco.jpg
+Egypt_Kahk.jpg
+ElSalvador_PolvorosasSalvadorenas.jpg
+Equatorial Guinea_BeignetsdeBanane.jpg
+Eritrea_Hembesha-inspired.jpg
+Estonia_Piparkoogid.jpg
+Eswatini_EmasiBiscuits.jpg
+Ether_Cinnamon_Spirals.jpg
+Ethiopia_Kolo.jpg
+Fiji_LoloBuns.jpg
+filenames.txt
+Finland_Joulutorttu.jpg
+France_SablesBretons.jpg
+Gabon_BananaBeignets.jpg
+Gambia_PeanutBiscuits.jpg
+Georgia_NazukiInspiredCookies.jpg
+Germany_Vanillekipferl.jpg
+Ghana_ChinChinInspiredBites.jpg
+Greece_Kourabiedes.jpg
+Grenada_NutmegCookies.jpg
+Guatemala_Ghampurradas.jpg
+Guinea_CoconutBeignets.jpg
+Guinea_ManjubaBiscuits.jpg
+Guyana_SalaraSlices.jpg
+Haiti_BonbonAmidon.jpg
+Honduras_RosquillasdeMaiz.jpg
+Hungary_Kifli.jpg
+Iceland_S?kkula?ibitak?kur.jpg
+India_Nankhatai.jpg
+Indonesia_KueKacang.jpg
+Iran_NaneBerenji.jpg
+Iraq_Kleicha.jpg
+Ireland_IrishShortbread.jpg
+Israel_MandelCookies.jpg
+Italy_Biscotti.jpg
+Jamaica_Gizzada.jpg
+Japan_MatchaCookie.jpg
+Jordan_Maamoul.jpg
+Kazakhstan_BaursakInspiredCookie.jpg
+Kenya_MandaziInspiredCookie.jpg
+Kiribati_CocontDropCookie.jpg
+Kosovo_Kifle.jpg
+Kuwait_Ghoraiba.jpg
+Kyrgyzstan_KattamaInspiredCookie.jpg
+Laos_KhaoNomKokInspiredCoconutCookie.jpg
+Latvia_Piparkukas.jpg
+Lebanon_Maamoul.jpg
+Lesotho_SesothoPeanutCookie.jpg
+Liberia_CocontRiceCookie.jpg
+Libya_Ghraybeh.jpg
+Liechtenstein_Spitzbuben.jpg
+Lithuania_Meduoliai.jpg
+Luxembourg_Breedele.jpg
+Madagascar_MofoSakayInspiredCookie.jpg
+Malawi_PeanutBiscuits.jpg
+Malaysia_KuihBangkit.jpg
+Maldives_BondibaiInspiredCoconutCookie.jpg
+Mali_BeignetsdeMillerInspiredCookie.jpg
+Malta_QaghqTalGhasel.jpg
+Marshall Islands_CoconutDropCookies.jpg
+Mauritania_DateNutCookie.jpg
+Mauritius_Napolitaines.jpg
+Mexico_Polvorones.jpg
+Micronesia_CoconutDropCookie.jpg
+Moldova_PrajiturelecuGem.jpg
+Monaco_SablesMonegasques.jpg
+Mongolia_BoortsogInspiredCookie.jpg
+Montenegro_Vanilice.jpg
+Morocco_Ghriba.jpg
+Mozambique_CoconutPeanutCookie.jpg
+Myanmar_MonrLoneYayBawInspiredCookie.jpg
+Namibia_PeanutButterBiscuit.jpg
+Nauru_CoconutDrop.jpg
+Nepal_GwaramariInspired.jpg
+Netherlands_Speculaas.jpg
+NewZealand_AfghanBiscuits.jpg
+Nicaragua_PolvoronesNicaraguenses.jpg
+Nigeria_ChinChin.jpg
+Niger_PeanutMillet.jpg
+North Macedonia_Kifli.jpg
+NorthKorea_YakgwaInspired.jpg
+Norway_Kringla.jpg
+Oman_OmaniDate-MakbusTamr.jpg
+Pakistan_Nankhatai.jpg
+Palau_CoconutDrop.jpg
+Palestine_Maamoul.jpg
+Panama_RosquillasdeMaiz.jpg
+Papua New Guinea_PapuaNewGuinea.jpg
+Paraguay_ChipaDulce.jpg
+Peru_Alfajores.jpg
+Philippines_Rolvoron.jpg
+Poland_Pierniczki.jpg
+Portugal_BolinhosdeAmendoa.jpg
+Qatar_Ghraiba.jpg
+Romania_CornuletecuGem.jpg
+Russia_Pryaniki.jpg
+Rwanda_PeanutBanana.jpg
+SaintKittsNevis_CoconutSugar.jpg
+SaintLucia_SpiceDrops.jpg
+SaintVincentGrenadines_CassavaPoneInspired.jpg
+Samoa_PanipopiInspiredCoconut.jpg
+San Marino_BiscottidiMandorle.jpg
+Sao Tome and Principe_ChocolateCoconut.jpg
+Saudi Arabia _Maamoui.jpg
+Senegal_PeanutGinger.jpg
+Serbia_Vanilice.jpg
+Seychelles_CoconutVanillaBiscuits.jpg
+Sierra Leone_GroundnutGinger.jpg
+Singapore_PineappleTart.png
+Slovakia_VanikoveRohlicky.jpg
+Slovenia_Medenjaki.jpg
+Solomon Islands_CoconutLime.jpg
+Somalia_XalwoInspiredSpice.jpg
+South Africa_Hertzoggies.jpg
+South Korea_Dasik.jpg
+South Sudan_PeanutDate.jpg
+Spain_Polvorones.jpg
+Sri Lanka _KokisInspiredCardamon.jpg
+Sudan_SpicedPeanutDate.jpg
+Suriname_Kokosmakronen.jpg
+Sweden_Pepparkakor.jpg
+Switzerland_BaslerBrunsli.jpg
+Syria_Barazek.jpg
+Taiwan_PineappleCake-FengLiSu.jpg
+Tajikistan_KulchaiBirini.jpg
+Tanzania_KashataInspiredCoconutPeanut.jpg
+Thailand_ThongMuanInspiredRoll.jpg
+Timor-Leste _CoconutCassava.jpg
+Togo_PeanutGinger.jpg
+Tonga_Shortbread.jpg
+TrinidadTobago_CoconutDrops.jpg
+Tunisia_Ghrayba.jpg
+Turkey_Kurabiye.jpg
+Turkmenistan_GokChapakInspiredButterCookie.jpg
+Tuvalu_CoconutCassava.jpg
+Uganda_PeanutBanana.jpg
+Ukraine_Pryanyky.jpg
+United Arab Emirates_Kleicha.jpg
+United Kingdom_Shortbread.jpg
+UnitedStatesofAmerica_ChocolateChip.jpg
+Uruguay_AlfajoresdeMaicena.jpg
+Uzbekistan_Kulcha.jpg
+Vanuatu_CoconutCassava.jpg
+Vatican City_Biscotti.jpg
+Venezuela_Polvorosas.jpg
+Vietnam_BanhQuyDua.jpg
+Yemen_KaakYemeni.jpg
+Zambia_PeanutHoneyCookie.jpg
+Zimbabwe_SweetPotatoPeanutCookie.jpg
