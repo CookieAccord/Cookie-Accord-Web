@@ -2,6 +2,7 @@
 import React, { PropsWithChildren } from "react";
 import { NavLink } from "react-router-dom";
 import { Cookie } from "lucide-react";
+import Footer from "../components/Footer";
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
@@ -30,19 +31,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
           {/* Navigation */}
           <nav className="flex items-center gap-3 text-sm text-zinc-700">
-            {/* Buy the Book */}
-            <NavLink
-              to="/purchase"
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1 flex items-center gap-2 ${
-                  isActive
-                    ? "bg-amber-100 text-amber-900"
-                    : "text-stone-700 hover:bg-stone-100"
-                }`
-              }
-            >
-             
-
             <NavLink
               to="/"
               className={({ isActive }) =>
@@ -82,7 +70,18 @@ export default function RootLayout({ children }: PropsWithChildren) {
               Contact
             </NavLink>
 
-           <Cookie className="h-4 w-4" style={{ color: "#A25528" }} />
+            {/* Buy the Book / Free PDF */}
+            <NavLink
+              to="/purchase"
+              className={({ isActive }) =>
+                `rounded-xl px-3 py-1 flex items-center gap-2 ${
+                  isActive
+                    ? "bg-amber-100 text-amber-900"
+                    : "text-stone-700 hover:bg-stone-100"
+                }`
+               }
+              >
+             <Cookie className="h-4 w-4" style={{ color: "#A25528" }} />
               <span className="leading-tight">
                 Free PDF Book
                 <span className="block text-[10px] text-amber-700">
@@ -90,22 +89,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
                 </span>
               </span>
             </NavLink>
-
-            {/*<NavLink
-              to="/share"
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1 ${
-                  isActive
-                    ? "bg-emerald-100 text-emerald-900"
-                    : "text-stone-700 hover:bg-stone-100"
-                }`
-              }
-            >
-              Share
-            </NavLink>*/}
-
-           {/*} <NavLink
-              to="/stories"
+           {/*<NavLink
+              to="/me-n-sol"
               className={({ isActive }) =>
                 `rounded-xl px-3 py-1 ${
                   isActive
@@ -114,45 +99,17 @@ export default function RootLayout({ children }: PropsWithChildren) {
                 }`
               }
             >
-              Stories
-            </NavLink>*/}
-
-           {/*} <NavLink
-              to="/recipes"
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1 ${
-                  isActive
-                    ? "bg-amber-100 text-amber-900"
-                    : "text-stone-700 hover:bg-stone-100"
-                }`
-              }
-            >
-              Recipes
+              Poems
             </NavLink>*/}
           </nav>
         </div>
       </header>
 
-      {/* Main content grows to fill, pushing footer down */}
+      {/* Main content */}
       <main className="flex-1 pb-4">{children}</main>
 
-      <footer className="mt-3 py-2 border-t border-amber-100 text-center text-[11px] text-zinc-600 leading-snug">
-        <p className="mt-0.5">
-          A cookie is tiny. The gesture is enormous.
-        </p>
-
-        <p className="mt-1 text-zinc-700">
-          Made with sweetness &amp; peace
-        </p>
-
-        <p className="mt-0.5">
-          Cookie Accord © 2025 <span className="inline-block">🍪</span>
-        </p>
-
-        <p className="mt-0.5 text-zinc-500">
-          me n Sol – 2025
-        </p>
-      </footer>
+      {/* Global footer */}
+      <Footer />
     </div>
   );
 }
