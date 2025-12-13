@@ -3,7 +3,7 @@ import React, { PropsWithChildren } from "react";
 import { NavLink } from "react-router-dom";
 import { Cookie } from "lucide-react";
 import Footer from "../components/Footer";
-
+import { Outlet } from "react-router-dom";
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-stone-900">
@@ -106,7 +106,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pb-4">{children}</main>
+      <main className="flex-1 pb-4">
+  <Outlet />
+</main>
 
       {/* Global footer */}
       <Footer />
