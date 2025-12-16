@@ -76,7 +76,7 @@
       "sharedWith": "",
       "memory": ""
     },
-    "photoUrl": "images/cookies/Albania_Kurabie.jpg",
+    "photoUrl": "/images/cookies/Albania_Kurabie.jpg",
     "photoCredits": "",
     "additionalPhotos": []
   },
@@ -115,7 +115,7 @@
       "sharedWith": "",
       "memory": ""
     },
-    "photoUrl": "images/cookies/Algeria_Ghribia.jpg",
+    "photoUrl": "/images/cookies/Algeria_Ghribia.jpg",
     "photoCredits": "",
     "additionalPhotos": []
   },
@@ -157,7 +157,7 @@
       "sharedWith": "",
       "memory": ""
     },
-    "photoUrl": "images/cookies/Andorra_Carquinyolis.jpg",
+    "photoUrl": "/images/cookies/Andorra_Carquinyolis.jpg",
     "photoCredits": "",
     "additionalPhotos": []
   },
@@ -281,7 +281,7 @@
       "sharedWith": "",
       "memory": ""
     },
-    "photoUrl": "images/cookies/Argentina_Alfajores.jpg",
+    "photoUrl": "/images/cookies/Argentina_Alfajores.jpg",
     "photoCredits": "",
     "additionalPhotos": []
   },
@@ -1952,7 +1952,7 @@
       "sharedWith": "",
       "memory": ""
     },
-    "photoUrl": "public/images/cookies/Ecuador_GalletasdeAcenayCoco.jpg",
+    "photoUrl": "/images/cookies/Ecuador_GalletasdeAcenayCoco.jpg",
     "photoCredits": "",
     "additionalPhotos": []
   },
@@ -6828,7 +6828,7 @@
     "additionalPhotos": []
   },
   {
-    "id": "country-cookie",
+    "id": "short-bread",
     "country": "United Kingdom",
     "title": "Shortbread Cookie",
     "alternateTitle": "",

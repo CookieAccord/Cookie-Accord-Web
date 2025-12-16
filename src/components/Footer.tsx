@@ -17,33 +17,35 @@ export default function Footer() {
 
         {/* Right */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="https://instagram.com/cookieaccord"
-            target="_blank"
-            rel="noreferrer"
-            className="text-amber-600 transition hover:text-amber-800 text-xs"
-          >
-            Instagram
-          </a>
-          <a
-            href="https://facebook.com/cookieaccord"
-            target="_blank"
-            rel="noreferrer"
-            className="text-amber-600 transition hover:text-amber-800 text-xs"
-          >
-            Facebook
-          </a>
-          <a
-            href="https://twitter.com/cookieaccord"
-            target="_blank"
-            rel="noreferrer"
-            className="text-amber-600 transition hover:text-amber-800 text-xs"
-          >
-            X (Twitter)
-          </a>
+  <a
+    href="https://instagram.com/cookieaccord"
+    target="_blank"
+    rel="noreferrer"
+    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+  >
+    Instagram
+  </a>
 
-          <ShareCookieButton />
-        </div>
+  <a
+    href="https://facebook.com/cookieaccord"
+    target="_blank"
+    rel="noreferrer"
+    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+  >
+    Facebook
+  </a>
+
+  <a
+    href="https://twitter.com/cookieaccord"
+    target="_blank"
+    rel="noreferrer"
+    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+  >
+    X (Twitter)
+  </a>
+
+  <ShareCookieButton />
+</div>
       </div>
     </footer>
   );

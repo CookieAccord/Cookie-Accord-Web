@@ -508,11 +508,13 @@ function CountryPicker({
   favorites,
   onPick,
   onToggleFavorite,
+  onSearchChange,
 }: {
   data: CookieRow[];
   favorites: string[];
   onPick: (cookie: CookieRow) => void;
   onToggleFavorite: (cookie: CookieRow) => void;
+  onSearchChange?: () => void;
 }) {
 
   const [filter, setFilter] = useState("");
@@ -1105,15 +1107,55 @@ alert(
     return data.filter((r) => isFavorite(r.id));
   }, [data, showFavoritesOnly, favorites]);
 
+const [cookieKeyword, setCookieKeyword] = useState("");
+
+const filteredByKeyword = useMemo(() => {
+  const q = cookieKeyword.trim().toLowerCase();
+  if (!q) return viewData;
+
+  return viewData.filter((c) => {
+    const hay = [
+      c.title,
+      c.alternateTitle,
+      c.country,
+      c.pronounced,
+      c.culturalNote,
+      c.personalNote,
+      c.birthdayTip,
+      Array.isArray(c.ingredients) ? c.ingredients.join(" ") : "",
+      Array.isArray(c.steps) ? c.steps.join(" ") : "",
+      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return hay.includes(q);
+  });
+}, [viewData, cookieKeyword]);
+
+const cookieCount = filteredByKeyword.length;
+
+const countryCountShown = new Set(
+  filteredByKeyword
+    .map((c) => (c.country || "").trim())
+    .filter(Boolean)
+).size;
+
   const heroCopy =
-    <p className="text-zinc-700">
-  Cookie Accord gathers the world’s beloved cookies into one welcoming place—each
-  one carrying its own notes of culture, memory, and meaning. Wander through these
-  traditions, and let the kindness baked into every cookie meet you along the way.
-  Our companion book takes these flavors a step further—lingering in stories and
-  reflections for your shared moments off screen. It also helps expand the Cookie
-  Accord project—finding common ground, one tradition at a time.
-  <Cookie className="inline-block ml-1 h-4 w-4 opacity-90 translate-y-[1px]"style={{ color: "#A25528"}} />
+   <p className="text-zinc-700">
+  <strong className="block mb-1 text-base sm:text-lg font-semibold">
+    Cookie Accord gathers the world’s beloved cookies into one welcoming place—
+    each one carrying its own notes of culture, memory, and meaning.
+  </strong>
+  Wander through these traditions, and let the kindness baked into every cookie
+  meet you along the way. Our companion book takes these flavors a step further—
+  lingering in stories and reflections for your shared moments off screen. It also
+  helps expand the Cookie Accord project—finding common ground, one tradition at a time.
+  <Cookie
+    className="inline-block ml-1 h-4 w-4 opacity-90 translate-y-[1px]"
+    style={{ color: "#A25528" }}
+  />
 </p>
 
   return (
@@ -1131,62 +1173,73 @@ alert(
         {/* Two-column body */}
         <main className="block">
           {/* Left Column */}
-          <section>
-            <motion.div {...fadeIn}>
-              <Card className="p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="flex items-center gap-2 text-base font-semibold text-zinc-800">
-                    <BookOpen className="h-5 w-5 text-amber-600" />
-                    Explore by Country
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-700">
+<section>
+  <motion.div {...fadeIn}>
+    <Card className="p-4">
 
-  {/* Move the global count here */}
-  <span className="text-zinc-600">
-    Currently sharing {viewData.length} cookie traditions from around the world.
-  </span>
+      {/* Cookie keyword search */}
+      <div className="mb-3">
+        <div className="flex items-center gap-2">
+          <Search className="h-4 w-4 text-zinc-500" />
+          <Input
+            value={cookieKeyword}
+            onChange={(e) => {
+              setCookieKeyword(e.target.value);
+              setSelectedCookie(null);
+            }}
+            placeholder="Search cookies (e.g., coconut, chocolate, almond)…"
+            aria-label="Search cookies"
+          />
+          {cookieKeyword && (
+            <button
+              type="button"
+              className="text-xs text-amber-700 hover:underline"
+              onClick={() => {
+                setCookieKeyword("");
+                setSelectedCookie(null);
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
-  {/* Favorites toggle */}
-  <label className="inline-flex items-center gap-1">
-    <input
-      type="checkbox"
-      checked={showFavoritesOnly}
-      onChange={(e) => setShowFavoritesOnly(e.target.checked)}
-      className="h-4 w-4 rounded border-zinc-300 text-amber-600 focus:ring-amber-400"
-    />
-    <span>Show my favorite cookies</span>
-  </label>
+        {/* 👇 THIS LINE GOES HERE */}
+        <p className="mt-1 text-xs text-zinc-600">
+          Showing{" "}
+          <span className="font-medium text-zinc-800">{cookieCount}</span>{" "}
+          {cookieCount === 1 ? "cookie" : "cookies"} across{" "}
+          <span className="font-medium text-zinc-800">
+            {countryCountShown}
+          </span>{" "}
+          {countryCountShown === 1 ? "country" : "countries"}
+        </p>
+      </div>
 
-</div>
+      {/* Country list */}
+      <CountryPicker
+        data={filteredByKeyword}
+        favorites={favorites}
+        onPick={handlePick}
+        onToggleFavorite={toggleFavorite}
+        onSearchChange={() => setSelectedCookie(null)}
+      />
 
-                </div>
-                <CountryPicker
-  data={viewData}
-  favorites={favorites}
-  onPick={handlePick}
-  onToggleFavorite={toggleFavorite}
-/>
-
-
-              </Card>
-            </motion.div>
-
-         {selectedCookie && (
-  <motion.div
-    ref={detailsRef}
-    className="mt-4"
-    {...fadeIn}
-  >
-    <CookieCard
-      data={selectedCookie}
-      isFavorite={isFavorite(selectedCookie.id)}
-      onToggleFavorite={toggleFavorite}
-      onClose={() => setSelectedCookie(null)}   // 👈 important line
-    />
+    </Card>
   </motion.div>
-)}
 
-          </section>
+  {/* Selected cookie card */}
+  {selectedCookie && (
+    <motion.div ref={detailsRef} className="mt-4" {...fadeIn}>
+      <CookieCard
+        data={selectedCookie}
+        isFavorite={isFavorite(selectedCookie.id)}
+        onToggleFavorite={toggleFavorite}
+        onClose={() => setSelectedCookie(null)}
+      />
+    </motion.div>
+  )}
+</section>
 
        </main>
 

@@ -8,7 +8,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-stone-900">
       <header className="sticky top-0 z-10 border-b border-amber-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Logo + title */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-transparent">
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
               />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-zinc-900">
+              <h1 className="text-4xl font-semibold text-zinc-900">
                 Cookie Accord
               </h1>
               <p className="text-xs text-zinc-600">
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-3 text-sm text-zinc-700">
+          <nav className="flex flex-wrap items-center gap-2 text-sm text-zinc-700 sm:justify-end">
             <NavLink
               to="/"
               className={({ isActive }) =>
