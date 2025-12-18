@@ -820,6 +820,7 @@ function CookieCard({
   onToggleFavorite,
   scrollRef,
   onClose,
+  onDelete,
 }: {
   data: CookieRow;
   accent?: "amber" | "emerald";
@@ -827,6 +828,7 @@ function CookieCard({
   onToggleFavorite?: (cookie: CookieRow) => void;
   scrollRef?: React.RefObject<HTMLHeadingElement>;
   onClose?: () => void;
+  onDelete?: (cookie: CookieRow) => void;
 }) {
   return (
     <Card
@@ -897,9 +899,27 @@ function CookieCard({
               )}
             </div>
 
-            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-              {data.country}
-            </span>
+            <div className="flex items-center gap-2">
+  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+    {data.country}
+  </span>
+
+  {onDelete && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation(); // don't close the card
+        onDelete(data);
+      }}
+      className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-[11px] text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700"
+      aria-label="Delete this submission"
+      title="Delete"
+    >
+      Delete
+    </button>
+  )}
+</div>
+
           </div>
 
           {data.alternateTitle && (
@@ -1041,42 +1061,58 @@ export default function CookieAccordTwoPane() {
 const handleSubmittedCookie = (row: CookieRow) => {
   console.log("Saving submitted cookie to localStorage from Home:", row);
 
- // 1) Save as a recipe (for Recipe Gallery)
-const newRecipe: RecipeItem = {
-  id: row.id,
-  title: row.title,
-  country: row.country || "Somewhere",
-  ingredients: row.ingredients || [],
-  steps: row.steps || [],
-  photoUrl: row.photoUrl || "",
-};
-
-const existingRecipes = loadUserRecipes();
-const updatedRecipes = [...existingRecipes, newRecipe];
-saveUserRecipes(updatedRecipes);
-
-// 2) If there *is* a story, save it for Stories
-if (row.story && row.story.trim()) {
-  const newStory: StoryItem = {
+  // 1) Save as a recipe (for Recipe Gallery)
+  const newRecipe: RecipeItem = {
     id: row.id,
-    name: "Anonymous", // or real name later
-    location: row.country || "Somewhere Cozy",
-    cookieName: row.title || "Untitled Cookie",
-    story: row.story.trim(),
+    title: row.title,
+    country: row.country || "Somewhere",
+    ingredients: row.ingredients || [],
+    steps: row.steps || [],
+    photoUrl: row.photoUrl || "",
   };
 
-  const existingStories = loadUserStories();
-  const updatedStories = [...existingStories, newStory];
-  saveUserStories(updatedStories);
-}
+  const existingRecipes = loadUserRecipes();
+  const updatedRecipes = [...existingRecipes, newRecipe];
+  saveUserRecipes(updatedRecipes);
 
-setSubmitted(row);
+  // 2) If there *is* a story, save it for Stories
+  if (row.story && row.story.trim()) {
+    const newStory: StoryItem = {
+      id: row.id,
+      name: "Anonymous",
+      location: row.country || "Somewhere Cozy",
+      cookieName: row.title || "Untitled Cookie",
+      story: row.story.trim(),
+    };
 
-alert(
-  "Thank you for sharing! Your recipe is now saved in this browser.\nYou can see it in the Recipes tab, and your story in Stories."
-);
+    const existingStories = loadUserStories();
+    const updatedStories = [...existingStories, newStory];
+    saveUserStories(updatedStories);
+  }
+
+  // 3) Update UI (this is what makes “Latest submission” appear)
+  setSubmitted(row);
+
+  // 4) Notify other pages/components
+  window.dispatchEvent(new Event("cookieaccord:storage-updated"));
+
+  alert(
+    "Thank you for sharing! Your recipe is now saved in this browser.\nYou can see it in the Recipes tab, and your story in Stories."
+  );
 };
+// Delete must be a separate function (NOT inside handleSubmittedCookie)
+function deleteUserSubmission(id: string) {
+  const updatedRecipes = loadUserRecipes().filter((r) => r.id !== id);
+  saveUserRecipes(updatedRecipes);
 
+  const updatedStories = loadUserStories().filter((s) => s.id !== id);
+  saveUserStories(updatedStories);
+
+  setSubmitted((prev) => (prev?.id === id ? null : prev));
+  setSelectedCookie((prev) => (prev?.id === id ? null : prev));
+
+  window.dispatchEvent(new Event("cookieaccord:storage-updated"));
+}
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
@@ -1281,13 +1317,21 @@ const countryCountShown = new Set(
     </motion.div>
 
     {submitted && (
-      <motion.div className="mt-4" {...fadeIn}>
-        <h3 className="mb-2 text-sm font-semibold text-zinc-700">
-          Latest submission
-        </h3>
-        <CookieCard data={submitted} accent="emerald" />
-      </motion.div>
-    )}
+  <motion.div className="mt-4" {...fadeIn}>
+    <h3 className="mb-2 text-sm font-semibold text-zinc-700">
+      Latest submission
+    </h3>
+    <CookieCard
+      data={submitted}
+      accent="emerald"
+      onDelete={(ck) => {
+        const ok = window.confirm("Delete this submission from this browser?");
+        if (ok) deleteUserSubmission(ck.id);
+      }}
+    />
+  </motion.div>
+)}
+
   </section>
        </main>
 
