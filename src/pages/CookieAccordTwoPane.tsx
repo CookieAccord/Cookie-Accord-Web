@@ -563,21 +563,12 @@ const cookiesByCountry = useMemo(() => {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Search className="h-4 w-4 text-zinc-500" />
-        <Input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Type to jump to a country…"
-          aria-label="Filter countries"
-        />
-      </div>
-
+      
       <div className="max-h-[50vh] overflow-auto rounded-2xl border border-zinc-200">
         <img
-  className="pointer-events-none absolute left-1/2 top-[70%] 
+  className="pointer-events-none absolute left-1/2 top-[90%] 
              -translate-x-1/2 -translate-y-1/2 
-             opacity-7 w-1/2"
+             opacity-9 w-1/2"
   src="/images/global-cookie-map.png"
   alt=""
 />
@@ -586,7 +577,8 @@ const cookiesByCountry = useMemo(() => {
           {visibleCountries.map((country) => (
             <li key={country} className="p-2">
               <details>
-               <summary className="flex cursor-pointer select-none items-center gap-2 rounded-xl px-2 py-1 text-sm font-medium text-zinc-800 hover:bg-zinc-50">
+               <summary className="group flex cursor-pointer select-none items-center gap-2 rounded-xl px-2 py-1 text-sm font-medium text-zinc-800 hover:bg-zinc-50">
+
   {getFlagSrc(country) ? (
     <img
       src={getFlagSrc(country)!}
@@ -598,13 +590,20 @@ const cookiesByCountry = useMemo(() => {
   )}
   
   <span className="flex flex-col">
-    <span>{country}</span>
-    {countryRegionsByName.get(country) && (
-      <span className="text-xs text-zinc-500">
-        {countryRegionsByName.get(country)}
-      </span>
-    )}
+  <span className="flex items-center gap-2">
+    {country}
+    <span className="text-xs text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100">
+      view cookies
+    </span>
   </span>
+
+  {countryRegionsByName.get(country) && (
+    <span className="text-xs text-zinc-500">
+      {countryRegionsByName.get(country)}
+    </span>
+  )}
+</span>
+
 </summary>
 
                 <div className="mt-2 space-y-1 pl-2">
@@ -689,10 +688,19 @@ function SubmissionForm({ onSubmit }: { onSubmit: (row: CookieRow) => void }) {
       : null;
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!preview) return;
-    onSubmit(preview);
-  }
+  e.preventDefault();
+  if (!preview) return;
+
+  onSubmit(preview);
+
+  // ✅ clear form so Live Preview disappears
+  setTitle("");
+  setCountry("");
+  setStory("");
+  setIngredients("");
+  setSteps("");
+  setPhotoUrl("");
+}
 
   return (
     <div className="space-y-4">
@@ -1102,29 +1110,44 @@ alert(
     );
   }
 
-  const viewData = useMemo(() => {
-    if (!showFavoritesOnly) return data;
-    return data.filter((r) => isFavorite(r.id));
-  }, [data, showFavoritesOnly, favorites]);
+ const viewData = useMemo(() => {
+  if (!showFavoritesOnly) return data;
+  return data.filter((r) => isFavorite(r.id));
+}, [data, showFavoritesOnly, favorites]);
 
-const [cookieKeyword, setCookieKeyword] = useState("");
+// ONE unified search query for country + cookie + ingredients + notes
+const [searchQuery, setSearchQuery] = useState("");
 
-const filteredByKeyword = useMemo(() => {
-  const q = cookieKeyword.trim().toLowerCase();
+const filteredCookies = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
   if (!q) return viewData;
 
   return viewData.filter((c) => {
+    const ingredientsText = Array.isArray(c.ingredients) ? c.ingredients.join(" ") : "";
+
+    // Support either `instructions` (your JSON) or `steps` (older code)
+    const instructionsText = Array.isArray((c as any).instructions)
+      ? (c as any).instructions.join(" ")
+      : Array.isArray((c as any).steps)
+      ? (c as any).steps.join(" ")
+      : "";
+
+    const tagsText = Array.isArray((c as any).tags) ? (c as any).tags.join(" ") : "";
+
     const hay = [
       c.title,
       c.alternateTitle,
       c.country,
       c.pronounced,
+      c.region,
+      c.language,
+      c.flagFunFact,
       c.culturalNote,
       c.personalNote,
       c.birthdayTip,
-      Array.isArray(c.ingredients) ? c.ingredients.join(" ") : "",
-      Array.isArray(c.steps) ? c.steps.join(" ") : "",
-      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+      ingredientsText,
+      instructionsText,
+      tagsText,
     ]
       .filter(Boolean)
       .join(" ")
@@ -1132,14 +1155,12 @@ const filteredByKeyword = useMemo(() => {
 
     return hay.includes(q);
   });
-}, [viewData, cookieKeyword]);
+}, [viewData, searchQuery]);
 
-const cookieCount = filteredByKeyword.length;
+const cookieCount = filteredCookies.length;
 
 const countryCountShown = new Set(
-  filteredByKeyword
-    .map((c) => (c.country || "").trim())
-    .filter(Boolean)
+  filteredCookies.map((c) => (c.country || "").trim()).filter(Boolean)
 ).size;
 
   const heroCopy =
@@ -1182,26 +1203,27 @@ const countryCountShown = new Set(
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-zinc-500" />
           <Input
-            value={cookieKeyword}
-            onChange={(e) => {
-              setCookieKeyword(e.target.value);
-              setSelectedCookie(null);
-            }}
-            placeholder="Search cookies (e.g., coconut, chocolate, almond)…"
-            aria-label="Search cookies"
-          />
-          {cookieKeyword && (
-            <button
-              type="button"
-              className="text-xs text-amber-700 hover:underline"
-              onClick={() => {
-                setCookieKeyword("");
-                setSelectedCookie(null);
-              }}
-            >
-              Clear
-            </button>
-          )}
+  value={searchQuery}
+  onChange={(e) => {
+    setSearchQuery(e.target.value);
+    setSelectedCookie(null);
+  }}
+  placeholder="Search countries, cookies, ingredients, notes…"
+  aria-label="Search cookies"
+/>
+{searchQuery && (
+  <button
+    type="button"
+    className="text-xs text-amber-700 hover:underline"
+    onClick={() => {
+      setSearchQuery("");
+      setSelectedCookie(null);
+    }}
+  >
+    Clear
+  </button>
+)}
+
         </div>
 
         {/* 👇 THIS LINE GOES HERE */}
@@ -1218,7 +1240,7 @@ const countryCountShown = new Set(
 
       {/* Country list */}
       <CountryPicker
-        data={filteredByKeyword}
+        data={filteredCookies}
         favorites={favorites}
         onPick={handlePick}
         onToggleFavorite={toggleFavorite}
@@ -1240,7 +1262,33 @@ const countryCountShown = new Set(
     </motion.div>
   )}
 </section>
+ {/* Right Column */}
+  <section>
+    <motion.div {...fadeIn}>
+      <Card className="p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-zinc-800">
+            <PlusCircle className="h-5 w-5 text-emerald-600" />
+            Share a Recipe
+          </h2>
+          <span className="text-xs text-zinc-500">
+            Saved in this browser for now
+          </span>
+        </div>
 
+        <SubmissionForm onSubmit={handleSubmittedCookie} />
+      </Card>
+    </motion.div>
+
+    {submitted && (
+      <motion.div className="mt-4" {...fadeIn}>
+        <h3 className="mb-2 text-sm font-semibold text-zinc-700">
+          Latest submission
+        </h3>
+        <CookieCard data={submitted} accent="emerald" />
+      </motion.div>
+    )}
+  </section>
        </main>
 
         {/* How it works */}
