@@ -1596,7 +1596,7 @@
   },
   {
     "id": "cote-d-ivoire-beignets-ivoiriens",
-    "country": "Côte d’Ivoire",
+    "country": "Côte d' Ivoire",
     "title": "Beignets Ivoiriens",
     "alternateTitle": "(Ivorian Fried Dough Balls)",
     "pronounced": "bay-NYAY ee-vwar-YEN",
@@ -6802,7 +6802,7 @@
   },
   {
     "id": "country-kleicha",
-    "country": "United Arab Emirates",
+    "country": "United Arab Emirates (UAE)",
     "title": "Kleicha",
     "alternateTitle": "(Date-Filled Cardamom Cookies)",
     "pronounced": "KLAY-cha",
