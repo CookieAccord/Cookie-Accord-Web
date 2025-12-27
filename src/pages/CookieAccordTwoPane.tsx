@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Cookie, Search, PlusCircle, Send, BookOpen, Heart } from "lucide-react";
 import RAW from "../data/traditionalCookies.json";
 import { countryRegions } from "../data/countries";
+import { mapDbToCookieRow, type RecipeRowDB } from "../lib/recipeMap";
 
 // ---------------- Story storage (for Stories page) ----------------
 type StoryItem = {
