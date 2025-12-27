@@ -1,3 +1,5 @@
+import type { CookieRow } from "../types/CookieRow";
+
 src/
   lib/
     recipeMap.ts   ← all mapping + parsing logic
@@ -8,7 +10,7 @@ src/
 
   // src/lib/recipeMap.ts
 
-import type { CookieRow } from "../types/CookieRow";
+export type MappedCookieRow = ReturnType<typeof mapDbToCookieRow>;
 
 export type RecipeRowDB = {
   id: string;
@@ -42,7 +44,7 @@ export type RecipeRowDB = {
 };
 
 export function parseTextList(v?: string | null): string[] | undefined {
-  if (!v) return undefined;
+  if (!v?.trim()) return undefined;
 
   const s = v.trim();
   if (!s) return undefined;
