@@ -1,10 +1,12 @@
 // src/layout/RootLayout.tsx
+import AuthButton from "../components/AuthButton";
 import React, { PropsWithChildren } from "react";
 import { NavLink } from "react-router-dom";
 import { Cookie } from "lucide-react";
 import Footer from "../components/Footer";
 import { Outlet } from "react-router-dom";
 export default function RootLayout({ children }: PropsWithChildren) {
+ 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-stone-900">
       <header className="sticky top-0 z-10 border-b border-amber-100 bg-white/80 backdrop-blur">

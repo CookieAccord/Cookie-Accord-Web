@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { Cookie, Search, PlusCircle, Send, BookOpen, Heart } from "lucide-react";
 import RAW from "../data/traditionalCookies.json";
 import { countryRegions } from "../data/countries";
-import { mapDbToCookieRow, type RecipeRowDB } from "../lib/recipeMap";
+import { RequireAuth } from "../components/RequireAuth";
+import { supabase } from "../lib/supabaseClient";
 
 // ---------------- Story storage (for Stories page) ----------------
 type StoryItem = {
@@ -54,6 +55,23 @@ function saveUserStories(stories: StoryItem[]) {
 }
 
 // ------------------------------- Types -------------------------------
+export type CommunityCookieRow = {
+  id: string;
+  title: string;
+  country: string;
+  ingredients: string;
+  instructions: string;
+  notes?: string | null;
+  source_url?: string | null;
+  submitter_name?: string | null;
+  owner_id?: string | null;   // ✅ ADD THIS
+  flagged: boolean;
+  hidden: boolean;
+  flagged_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CookieRow = {
   id: string;
   country: string;
@@ -117,6 +135,7 @@ console.log("Number missing:", missing.length);
 export const countryCount = new Set(allCountries).size;
 console.log("Distinct countries in RAW:", countryCount);
 
+
 // ------------------------------- Sample Data (fallback) -------------------------------
 const SAMPLE_DATA: CookieRow[] = [
   {
@@ -133,6 +152,7 @@ const SAMPLE_DATA: CookieRow[] = [
 ];
 
 // ------------------------------- Normalize helper -------------------------------
+
 function normalize(raw: any[]): CookieRow[] {
   if (!Array.isArray(raw)) return [];
 
@@ -564,6 +584,7 @@ function CountryPicker({
   };
 
   // Countries list for the left panel
+  
   const countries = useMemo(() => {
   const normLower = (s: string) => String(s || "").trim().toLowerCase();
   const titleCase = (s: string) =>
@@ -1024,6 +1045,7 @@ function CookieCard({
   scrollRef,
   onClose,
   onDelete,
+  canDelete,
 }: {
   data: CookieRow;
   accent?: "amber" | "emerald";
@@ -1032,8 +1054,16 @@ function CookieCard({
   scrollRef?: React.RefObject<HTMLHeadingElement>;
   onClose?: () => void;
   onDelete?: (cookie: CookieRow) => void;
+  canDelete?: boolean;
 }) {
-  return (
+  
+    const ingredientsList = Array.isArray(data.ingredients)
+    ? data.ingredients
+    : String(data.ingredients ?? "")
+        .split(/\r?\n|,\s*/g)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    return (
     <Card
       className="overflow-hidden cursor-pointer"
       onClick={() => {
@@ -1105,7 +1135,7 @@ function CookieCard({
                 <div>
                   <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Ingredients</h5>
                   <ul className="list-disc pl-5 text-sm text-zinc-700">
-                    {data.ingredients.map((it, i) => (
+                    {ingredientsList.map((it, i) => (
                       <li key={i}>{it}</li>
                     ))}
                   </ul>
@@ -1160,6 +1190,95 @@ export default function CookieAccordTwoPane() {
   const [showCommunity, setShowCommunity] = useState(false);
   const communityRef = useRef<HTMLDivElement | null>(null);
   const [countryView, setCountryView] = useState<"countries" | "community">("countries");
+const [communityRows, setCommunityRows] = useState<CommunityCookieRow[]>([]);
+const [communityLoading, setCommunityLoading] = useState(false);
+
+async function fetchCommunityCookies() {
+  setCommunityLoading(true);
+  const { data, error } = await supabase
+  .schema("public")
+  .from("cookies_community")
+  .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,owner_id,flagged,hidden,flagged_reason,created_at,updated_at")
+  .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("fetchCommunityCookies error:", error);
+    setCommunityRows([]);
+  } else {
+    setCommunityRows(data ?? []);
+  }
+  setCommunityLoading(false);
+}
+useEffect(() => {
+  (async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      await supabase.auth.signInAnonymously();
+    }
+  })();
+}, []);
+
+useEffect(() => {
+  fetchCommunityCookies();
+
+  const id = window.setInterval(() => {
+    fetchCommunityCookies();
+  }, 15000); // every 15 seconds (adjust)
+
+  return () => window.clearInterval(id);
+}, []);
+
+const [currentUid, setCurrentUid] = useState<string | null>(null);
+
+useEffect(() => {
+  (async () => {
+    const { data } = await supabase.auth.getSession();
+    const uid = data.session?.user?.id ?? null;
+    setCurrentUid(uid);
+  })();
+}, []);
+
+// ✅ PASTE THE BRIDGE RIGHT HERE (inside component, before other useMemos that need it)
+const communityCookies = useMemo<CookieRow[]>(() => {
+  return communityRows.map((r) => ({
+    id: r.id,
+    country: r.country,
+    title: r.title,               // ✅ CookieRow requires title
+    ingredients: r.ingredients,
+    instructions: r.instructions,
+    notes: r.notes ?? "",
+    source_url: r.source_url ?? "",
+  }));
+}, [communityRows]);
+
+// then your existing filtering logic can use communityCookies...
+
+
+// ✅ Step 3: build communityByCountry from Supabase communityRows
+const communityByCountry = useMemo(() => {
+  const m = new Map<string, CookieRow[]>();
+
+  for (const r of communityRows) {
+    const countryKey = r.country.trim() || "Unknown";
+
+    const ck: CookieRow = {
+      id: r.id,
+      country: r.country,
+      title: r.title,
+      ingredients: r.ingredients,
+      instructions: r.instructions,
+      // only keep these if CookieRow supports them
+      notes: r.notes ?? "",
+      source_url: r.source_url ?? "",
+    } as any;
+
+    const arr = m.get(countryKey) ?? [];
+    arr.push(ck);
+    m.set(countryKey, arr);
+  }
+
+  return m;
+}, [communityRows]);
 
   // Country list filter mode (curated/community)
   type CountryListMode = "all" | "curated" | "community";
@@ -1233,19 +1352,42 @@ export default function CookieAccordTwoPane() {
   }
 
   // Delete from community list (left panel ✕)
-  function handleDeleteCommunity(id: string) {
-    const ok = window.confirm("Delete this shared recipe?");
-    if (!ok) return;
-    deleteUserSubmission(id);
+  const handleDeleteCommunity = async (id: string) => {
+  const ok = window.confirm("Delete your submitted recipe?");
+  if (!ok) return;
+
+  const { error } = await supabase
+    .schema("public")
+    .from("cookies_community")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Supabase delete failed:", error);
+    alert(`Delete failed: ${error.message}`);
+    return;
   }
 
-  // When someone submits: save to localStorage + update state
-  const handleSubmittedCookie = (row: CookieRow) => {
-    const newId = `new-${Date.now()}`;
+  // Optimistic UI update (your 15s poll also keeps it in sync)
+  setCommunityRows((prev) => prev.filter((r) => r.id !== id));
+};
 
-    const newRow: CookieRow = {
+  // When someone submits: require login + save to Supabase (shared) + update state
+const handleSubmittedCookie = async (row: CookieRow) => {
+  try {
+    // 1) Require sign-in
+    const { data: userRes, error: userErr } = await supabase.auth.getUser();
+    if (userErr) throw userErr;
+
+    const user = userRes?.user;
+    if (!user) {
+      alert("Please sign in to submit a recipe. 💛");
+      return;
+    }
+
+    // 2) Normalize input (keep your defaults)
+    const normalized: CookieRow = {
       ...row,
-      id: newId,
       country: row.country || "Somewhere",
       ingredients: row.ingredients || [],
       steps: row.steps || [],
@@ -1253,33 +1395,110 @@ export default function CookieAccordTwoPane() {
       photoUrl: row.photoUrl || "",
     };
 
+    // 3) Insert into Supabase community table
+    // Map your CookieRow shape -> table shape.
+    // (Adjust column names if your table uses different ones.)
+
+const { data: sessionData } = await supabase.auth.getSession();
+const ownerId = sessionData?.session?.user?.id;
+
+if (!ownerId) {
+  alert("Session not ready yet. Please refresh and try again.");
+  return;
+}
+  
+ const payload = {
+  title: String(normalized.title || "Untitled Cookie").trim(),
+  country: String(normalized.country || "").trim(),
+  ingredients: String(
+    Array.isArray(normalized.ingredients)
+      ? normalized.ingredients.join("\n")
+      : normalized.ingredients ?? ""
+  ).trim(),
+  instructions: String(
+    Array.isArray(normalized.steps)
+      ? normalized.steps.join("\n")
+      : normalized.steps ?? ""
+  ).trim(),
+  notes: normalized.story?.trim?.() ? normalized.story.trim() : null,
+  source_url: normalized.sourceUrl?.trim?.() ? normalized.sourceUrl.trim() : null,
+  submitter_name: normalized.submitterName?.trim?.() ? normalized.submitterName.trim() : null,
+  owner_id: ownerId,
+};  // ← THIS LINE MUST EXIST
+
+// 👇 everything below must be OUTSIDE the object
+if (payload.title.length < 2) return alert("Please add a cookie title.");
+if (payload.country.length < 2) return alert("Please choose a country.");
+if (payload.ingredients.length < 10) return alert("Please add a bit more to ingredients (10+ chars).");
+if (payload.instructions.length < 10) return alert("Please add a bit more to instructions (10+ chars).");
+
+const { data: inserted, error: insertErr } = await supabase
+  .schema("public")
+  .from("cookies_community")
+  .insert(payload)
+  .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,created_at,updated_at")
+  .single();
+
+if (insertErr) throw insertErr;
+
+// Instant UI update
+setCommunityRows((prev) => [inserted, ...prev]);
+
+// Optional: show/open it
+setSubmitted({
+  id: inserted.id,
+  title: inserted.title,
+  country: inserted.country,
+  ingredients: inserted.ingredients,
+  instructions: inserted.instructions,
+  notes: inserted.notes ?? "",
+  source_url: inserted.source_url ?? "",
+} as any);
+
+    // 5) Update local UI state
+    // If you have a separate community state array, update that here.
+    // If you're reusing userRecipes, this keeps your existing UI behavior.
     const existing = loadUserRecipes();
-    const updated = [newRow, ...existing];
+    const updated = [inserted, ...existing];
     saveUserRecipes(updated);
     setUserRecipes(updated);
 
-    if (row.story && row.story.trim()) {
+    // 6) Save story locally too (optional)
+    // If you later move Stories to Supabase, we’ll refactor this part.
+    if (inserted.story && inserted.story.trim()) {
       const newStory: StoryItem = {
-        id: newRow.id,
+        id: inserted.id,
         name: "Anonymous",
-        location: newRow.country || "Somewhere Cozy",
-        cookieName: newRow.title || "Untitled Cookie",
-        story: row.story.trim(),
+        location: inserted.country || "Somewhere Cozy",
+        cookieName:inserted.title || "Untitled Cookie",
+        story: inserted.story.trim(),
       };
-
       const existingStories = loadUserStories();
       saveUserStories([...existingStories, newStory]);
     }
 
-    setSubmitted(newRow);
-    setSelectedCookie(newRow);
+    setSubmitted(inserted);
+    setSelectedCookie(inserted);
 
     window.dispatchEvent(new Event("cookieaccord:storage-updated"));
 
     alert(
-      "Thank you for sharing! Your recipe is now saved in this browser.\nYou can see it in the Recipes tab, and your story in Stories."
+      "Thank you for sharing! Your recipe is now saved to the community.\nYou can also see it in this browser under Recipes, and your story in Stories."
     );
-  };
+  } catch (err: any) {
+  console.error("handleSubmittedCookie error:", err);
+
+  const msg =
+    err?.message ||
+    err?.error_description ||
+    err?.details ||
+    err?.hint ||
+    (typeof err === "string" ? err : JSON.stringify(err, null, 2));
+
+  alert(`Submit failed: ${msg}`);
+}
+
+};
 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -1313,6 +1532,7 @@ export default function CookieAccordTwoPane() {
   }
 
   // ---------- ONE unified search query (curated + community) ----------
+    
   const [searchQuery, setSearchQuery] = useState("");
 
   const matchesQuery = (c: CookieRow, qRaw: string) => {
@@ -1354,11 +1574,12 @@ export default function CookieAccordTwoPane() {
   }, [data, showFavoritesOnly, favorites, searchQuery]);
 
   const communityFiltered = useMemo(() => {
-    if (!searchQuery.trim()) return userRecipes;
-    return userRecipes.filter((c) => matchesQuery(c, searchQuery));
-  }, [userRecipes, searchQuery]);
+  if (!searchQuery.trim()) return communityCookies;
+  return communityCookies.filter((c) => matchesQuery(c, searchQuery));
+}, [communityCookies, searchQuery]);
 
   // Grouped maps (FILTERED) so CountryPicker shows only relevant countries when searching
+  
   const curatedByCountry = useMemo(() => {
     const map = new Map<string, CookieRow[]>();
     curatedFiltered.forEach((cookie) => {
@@ -1370,16 +1591,16 @@ export default function CookieAccordTwoPane() {
     return map;
   }, [curatedFiltered]);
 
-  const communityByCountry = useMemo(() => {
-    const map = new Map<string, CookieRow[]>();
-    communityFiltered.forEach((cookie) => {
-      const country = String(cookie.country || "").trim();
-      if (!country) return;
-      if (!map.has(country)) map.set(country, []);
-      map.get(country)!.push(cookie);
-    });
-    return map;
-  }, [communityFiltered]);
+ const communityByCountryFiltered = useMemo(() => {
+  const map = new Map<string, CookieRow[]>();
+  communityFiltered.forEach((cookie) => {
+    const country = String(cookie.country || "").trim();
+    if (!country) return;
+    if (!map.has(country)) map.set(country, []);
+    map.get(country)!.push(cookie);
+  });
+  return map;
+}, [communityFiltered]);
 
   const curatedCount = curatedFiltered.length;
   const communityCount = communityFiltered.length;
@@ -1538,23 +1759,21 @@ export default function CookieAccordTwoPane() {
                   <span className="text-xs text-zinc-500">Saved in this browser for now</span>
                 </div>
 
-                <SubmissionForm onSubmit={handleSubmittedCookie} />
+  <SubmissionForm onSubmit={handleSubmittedCookie} />
+
               </Card>
             </motion.div>
 
             {submitted && (
-              <motion.div className="mt-4" {...fadeIn}>
-                <h3 className="mb-2 text-sm font-semibold text-zinc-700">Latest submission</h3>
-                <CookieCard
-                  data={submitted}
-                  accent="emerald"
-                  onDelete={(ck) => {
-                    const ok = window.confirm("Delete this submission from this browser?");
-                    if (ok) deleteUserSubmission(ck.id);
-                  }}
-                />
-              </motion.div>
-            )}
+  <motion.div className="mt-4" {...fadeIn}>
+    <h3 className="mb-2 text-sm font-semibold text-zinc-700">Latest submission</h3>
+    <CookieCard
+      data={submitted}
+      accent="emerald"
+    />
+  </motion.div>
+)}
+
           </section>
         </main>
 
