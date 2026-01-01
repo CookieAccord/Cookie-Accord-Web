@@ -1733,11 +1733,11 @@ setSubmitted({
     )
   </span>
 </p>
-<span className="italic opacity-90 text-sm">
-  In preview mode, shared recipes stay in your browser.
+<span className="opacity-90 text-sm">
+  The Cookie Accord Community is now open.
 </span>
 <span className="italic opacity-90 text-sm">
- <p> Cookie Accord Community - Coming Soon. </p>
+ <p> Share a recipe and become part of the growing circle. </p>
 </span>
                 </div>
 
