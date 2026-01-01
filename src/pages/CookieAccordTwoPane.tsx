@@ -25,7 +25,13 @@ function loadUserStories(): StoryItem[] {
     const raw = window.localStorage.getItem(STORY_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as StoryItem[]) : [];
   } catch {
-   
+    
+   useEffect(() => {
+  ensureAnonSession().catch((err) => {
+    console.error("ensureAnonSession failed:", err);
+  });
+}, []);
+
    useEffect(() => {
   const onError = (e: ErrorEvent) => {
     console.error("WINDOW ERROR:", e.message, e.error);
@@ -1371,6 +1377,23 @@ const communityByCountry = useMemo(() => {
   // Optimistic UI update (your 15s poll also keeps it in sync)
   setCommunityRows((prev) => prev.filter((r) => r.id !== id));
 };
+async function ensureAnonSession(): Promise<string> {
+  // 1) Try existing session
+  const { data: s1, error: e1 } = await supabase.auth.getSession();
+  if (e1) throw e1;
+
+  const uid1 = s1.session?.user?.id;
+  if (uid1) return uid1;
+
+  // 2) Create anonymous session
+  const { data: s2, error: e2 } = await supabase.auth.signInAnonymously();
+  if (e2) throw e2;
+
+  const uid2 = s2.session?.user?.id;
+  if (!uid2) throw new Error("Auth session missing (anonymous sign-in failed).");
+
+  return uid2;
+}
 
   // When someone submits: require login + save to Supabase (shared) + update state
 const handleSubmittedCookie = async (row: CookieRow) => {
@@ -1400,7 +1423,7 @@ const handleSubmittedCookie = async (row: CookieRow) => {
     // (Adjust column names if your table uses different ones.)
 
 const { data: sessionData } = await supabase.auth.getSession();
-const ownerId = sessionData?.session?.user?.id;
+const ownerId = await ensureAnonSession();
 
 if (!ownerId) {
   alert("Session not ready yet. Please refresh and try again.");
