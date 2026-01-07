@@ -1,6 +1,7 @@
 // src/pages/Download.tsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { celebrateDownload } from "../utils/celebrate";
 
 const PDF_PATH = "/CookieAccordBook.pdf";
 // Make sure this file is inside /public
@@ -21,13 +22,20 @@ export default function Download() {
         </p>
 
         {/* -------- Download Button -------- */}
-        <a
-          href={PDF_PATH}
-          download="CookieAccordBook.pdf"
-          className="inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition"
-        >
-          ⬇️ Download the Free PDF Book
-        </a>
+<a
+  href={PDF_PATH}
+  download="CookieAccordBook.pdf"
+  onClick={() => {
+  console.log("Download clicked ✅");
+  celebrateDownload();
+}}
+
+  className="inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition"
+>
+  ⬇️ Download the Free PDF Book
+</a>
+
+console.log("clicked download");
 
         <p className="mt-3 text-xs text-stone-500">
           If the book opens in your browser instead of downloading, use the 

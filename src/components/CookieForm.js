@@ -24,7 +24,7 @@ export default function CookieForm() {
     const [submittedData, setSubmittedData] = React.useState(null);
     const firstErrorRef = React.useRef(null);
     const limits = { title: 80, story: 600, steps: 2000 };
-    const titleCount = `${form.title.length}/${limits.title}`;
+    const titleCount = `${form.title.length}/${limits`;
     const storyCount = `${form.story.length}/${limits.story}`;
     const stepsCount = `${form.steps.length}/${limits.steps}`;
     // Normalize textarea lines into clean arrays
@@ -45,7 +45,7 @@ export default function CookieForm() {
         if (!values.consent)
             e.consent = "Please agree to share kindly & originally.";
         if (values.title.length > limits.title)
-            e.title = `Keep title under ${limits.title} characters.`;
+            e.title = `Keep title under ${limits characters.`;
         if (values.story.length > limits.story)
             e.story = `Keep story under ${limits.story} characters.`;
         return e;

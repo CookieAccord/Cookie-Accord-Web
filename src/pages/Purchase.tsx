@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Download } from "lucide-react";
+import { celebrateDownload } from "../utils/celebrate";
 
 export default function Purchase() {
   return (
@@ -15,13 +16,18 @@ export default function Purchase() {
 
       {/* ------------------ Download Button ------------------ */}
       <div className="mt-8 flex justify-center">
-        <a
-          href="/CookieAccordBook.pdf" 
-          download
-          className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 font-medium text-white shadow hover:bg-amber-600 transition"
-        >
-          <Download size={18} /> Download Free PDF Book
-        </a>
+       <a
+  href="/CookieAccordBook.pdf"
+  download
+  onClick={() => {
+    console.log("Purchase download clicked ✅");
+    celebrateDownload();
+  }}
+  className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 font-medium text-white shadow hover:bg-amber-600 transition"
+>
+  <Download size={18} /> Download Free PDF Book
+</a>
+
       </div>
 
       {/* ------------------ Donation Section ------------------ */}
@@ -43,20 +49,34 @@ export default function Purchase() {
           </div>
         </div>
 
-        {/* Donate Button (uses your existing Stripe setup) */}
-        <div className="mt-6 flex justify-center">
-          <a
-            href="https://buy.stripe.com/eVq14m4U0dlK3WY13B2oE02"
-            className="inline-flex items-center justify-center rounded-full bg-green-600 px-6 py-3 font-medium text-white shadow hover:bg-green-700 transition"
-          >
-            Donate & Support the Project
-          </a>
-        </div>
+        {/* Donate Button (opens Stripe in a new tab) */}
+<div className="mt-6 flex justify-center">
+  <a
+    href="https://buy.stripe.com/eVq14m4U0dlK3WY13B2oE02"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center justify-center rounded-full bg-green-600 px-6 py-3 font-medium text-white shadow hover:bg-green-700 transition"
+  >
+    Donate & Support the Project
+  </a>
+</div>
 
-        <p className="mt-3 text-center text-xs text-zinc-500">
-          Donations are securely handled by Stripe. Your payment details never touch this site.
-        </p>
+        <p className="mt-2 text-xs text-stone-500 text-center">
+  Donations are securely handled by Stripe. Your payment details never touch this site.
+</p>
+<p className="mt-1 text-xs text-stone-500 text-center">
+  The donation page will open in a new tab so you can easily return to Cookie Accord.
+</p>
+
       </div>
+<div className="mt-6 text-center">
+  <Link
+    to="/"
+    className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 transition"
+  >
+    ← Back Home
+  </Link>
+</div>
 
       {/* ------------------ Footer Note ------------------ */}
       <p className="mt-8 text-center text-xs text-zinc-500">

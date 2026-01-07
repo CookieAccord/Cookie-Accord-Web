@@ -143,7 +143,7 @@ export default function RecipeGallery() {
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <div>
                       <h2 className="text-base font-semibold text-stone-900">
-                        {r.title}
+                        {r
                       </h2>
                       <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-stone-700">
                         {r.country || "Somewhere"}
@@ -165,7 +165,7 @@ export default function RecipeGallery() {
                     <div className="mb-3 h-32 overflow-hidden rounded-2xl border border-amber-100 bg-amber-50">
                       <img
                         src={r.photoUrl}
-                        alt={r.title}
+                        alt={r
                         className="h-full w-full object-cover"
                       />
                     </div>

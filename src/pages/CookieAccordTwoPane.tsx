@@ -25,28 +25,6 @@ function loadUserStories(): StoryItem[] {
     const raw = window.localStorage.getItem(STORY_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as StoryItem[]) : [];
   } catch {
-    
-   useEffect(() => {
-  ensureAnonSession().catch((err) => {
-    console.error("ensureAnonSession failed:", err);
-  });
-}, []);
-
-   useEffect(() => {
-  const onError = (e: ErrorEvent) => {
-    console.error("WINDOW ERROR:", e.message, e.error);
-  };
-  const onRejection = (e: PromiseRejectionEvent) => {
-    console.error("UNHANDLED PROMISE:", e.reason);
-  };
-  window.addEventListener("error", onError);
-  window.addEventListener("unhandledrejection", onRejection);
-  return () => {
-    window.removeEventListener("error", onError);
-    window.removeEventListener("unhandledrejection", onRejection);
-  };
-}, []);
-
     return [];
   }
 }
@@ -70,7 +48,7 @@ export type CommunityCookieRow = {
   notes?: string | null;
   source_url?: string | null;
   submitter_name?: string | null;
-  owner_id?: string | null;   // ✅ ADD THIS
+  owner_id?: string | null; // ✅ ADD THIS
   flagged: boolean;
   hidden: boolean;
   flagged_reason?: string | null;
@@ -87,7 +65,8 @@ export type CookieRow = {
   ingredients?: string[];
   steps?: string[];
   tags?: string[];
-  photoUrl?: string;
+  photo_url?: string | null;
+  photoUrl?: string | null;
 
   // Cultural Details
   photoCredits?: string;
@@ -133,14 +112,15 @@ function saveUserRecipes(recipes: RecipeItem[]) {
 
 // --- debug / derived data ---
 const allCountries = (RAW as any[]).map((c) => String(c.country || "").trim());
-const missing = allCountries.filter((ct) => !countryRegions.some((cr) => cr.country === ct));
+const missing = allCountries.filter(
+  (ct) => !countryRegions.some((cr) => cr.country === ct)
+);
 
 // NOTE: If these logs annoy you in production, wrap with `if (import.meta.env.DEV)`.
 console.log("Countries missing from countries.json:", missing);
 console.log("Number missing:", missing.length);
 export const countryCount = new Set(allCountries).size;
 console.log("Distinct countries in RAW:", countryCount);
-
 
 // ------------------------------- Sample Data (fallback) -------------------------------
 const SAMPLE_DATA: CookieRow[] = [
@@ -150,15 +130,26 @@ const SAMPLE_DATA: CookieRow[] = [
     title: "ANZAC Biscuits",
     pronounced: "AN-zak",
     description: "Oaty, caramelized biscuits with golden syrup.",
-    ingredients: ["1 cup rolled oats", "1 cup flour", "1/2 cup sugar", "1/2 cup coconut", "2 tbsp golden syrup", "1/2 cup butter"],
-    steps: ["Melt butter with golden syrup.", "Combine dry ingredients; stir in butter mixture.", "Scoop, flatten, and bake at 350°F (175°C) for 10–12 minutes."],
+    ingredients: [
+      "1 cup rolled oats",
+      "1 cup flour",
+      "1/2 cup sugar",
+      "1/2 cup coconut",
+      "2 tbsp golden syrup",
+      "1/2 cup butter",
+    ],
+    steps: [
+      "Melt butter with golden syrup.",
+      "Combine dry ingredients; stir in butter mixture.",
+      "Scoop, flatten, and bake at 350°F (175°C) for 10–12 minutes.",
+    ],
     tags: ["oaty", "caramelized", "chewy"],
-    photoUrl: "https://images.unsplash.com/photo-1606313564200-6ecb8d6c5b36?auto=format&fit=crop&w=900&q=60",
+    photoUrl:
+      "https://images.unsplash.com/photo-1606313564200-6ecb8d6c5b36?auto=format&fit=crop&w=900&q=60",
   },
 ];
 
 // ------------------------------- Normalize helper -------------------------------
-
 function normalize(raw: any[]): CookieRow[] {
   if (!Array.isArray(raw)) return [];
 
@@ -169,7 +160,7 @@ function normalize(raw: any[]): CookieRow[] {
     return fallback;
   };
 
-  const toLines = (v: any) =>
+  const toLines = (v: any): string[] | undefined =>
     v == null
       ? undefined
       : Array.isArray(v)
@@ -187,7 +178,20 @@ function normalize(raw: any[]): CookieRow[] {
     const ingredientsVal = pick(r, ["ingredients", "Ingredients", "ingredient", "Ingredient"], undefined);
     const stepsVal = pick(
       r,
-      ["steps", "Steps", "method", "Method", "directions", "Directions", "instruction", "Instruction", "instructions", "Instructions", "preparation", "Preparation"],
+      [
+        "steps",
+        "Steps",
+        "method",
+        "Method",
+        "directions",
+        "Directions",
+        "instruction",
+        "Instruction",
+        "instructions",
+        "Instructions",
+        "preparation",
+        "Preparation",
+      ],
       undefined
     );
     const tagsRaw = pick(r, ["tags", "Tags", "tag", "Tag", "keywords", "Keywords"], "");
@@ -202,21 +206,21 @@ function normalize(raw: any[]): CookieRow[] {
       id: r.id || `row-${i}`,
       country: String(countryVal).trim() || "Unknown",
       title: String(titleVal).trim() || "Untitled",
-      description: descVal,
-      story: storyVal,
+      description: String(descVal || ""),
+      story: String(storyVal || ""),
       ingredients: toLines(ingredientsVal) || [],
       steps: toLines(stepsVal) || [],
       tags: toLines(tagsRaw) || [],
-      alternateTitle: altTitleVal || "",
-      pronounced: pronouncedVal || "",
-      photoUrl: r.photoUrl || r.photo || "",
-      culturalNote: culturalNoteVal || "",
-      birthdayTip: birthdayTipVal || "",
-      personalNote: personalNoteVal || "",
-      passportStamp: passportStampVal || "",
-      flagFunFact: r.flagFunFact || r.funFact || "",
-      region: r.region || "",
-      language: r.language || "",
+      alternateTitle: String(altTitleVal || ""),
+      pronounced: String(pronouncedVal || ""),
+      photoUrl: (r.photoUrl || r.photo || "") as any,
+      culturalNote: String(culturalNoteVal || ""),
+      birthdayTip: String(birthdayTipVal || ""),
+      personalNote: String(personalNoteVal || ""),
+      passportStamp: String(passportStampVal || ""),
+      flagFunFact: String(r.flagFunFact || r.funFact || ""),
+      region: String(r.region || ""),
+      language: String(r.language || ""),
     } as CookieRow;
   });
 
@@ -578,6 +582,12 @@ function CountryPicker({
   setView: (v: "countries" | "community") => void; // ✅ parent setter
 }) {
   // Helper: NO hooks inside
+
+const getPhotoUrl = (ck: CookieRow) =>
+  (ck.photo_url?.trim?.() ? ck.photo_url.trim() : null) ??
+  (ck.photoUrl?.trim?.() ? ck.photoUrl.trim() : null);
+
+
   const getByCountryCI = (map: Map<string, CookieRow[]>, country: string) => {
     const exact = map.get(country);
     if (exact) return exact;
@@ -1062,14 +1072,52 @@ function CookieCard({
   onDelete?: (cookie: CookieRow) => void;
   canDelete?: boolean;
 }) {
-  
-    const ingredientsList = Array.isArray(data.ingredients)
+  const ingredientsList = Array.isArray(data.ingredients)
     ? data.ingredients
     : String(data.ingredients ?? "")
         .split(/\r?\n|,\s*/g)
         .map((s) => s.trim())
         .filter(Boolean);
-    return (
+
+  // Accept both snake_case + camelCase
+  const rawPhoto =
+    (data.photo_url?.trim?.() ? data.photo_url.trim() : "") ||
+    (data.photoUrl?.trim?.() ? data.photoUrl.trim() : "");
+
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      if (!rawPhoto) {
+        if (alive) setResolvedUrl(null);
+        return;
+      }
+
+      // Already a usable URL/data URL
+      if (
+        /^https?:\/\//i.test(rawPhoto) ||
+        rawPhoto.startsWith("data:image/") ||
+        rawPhoto.startsWith("blob:")
+      ) {
+        if (alive) setResolvedUrl(rawPhoto);
+        return;
+      }
+
+      // Otherwise treat as Storage path in bucket "photos" (public)
+      const { data: pub } = supabase.storage.from("photos").getPublicUrl(rawPhoto);
+      const url = pub?.publicUrl || null;
+
+      if (alive) setResolvedUrl(url);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [rawPhoto]);
+
+  return (
     <Card
       className="overflow-hidden cursor-pointer"
       onClick={() => {
@@ -1078,9 +1126,14 @@ function CookieCard({
     >
       <div className={cx("h-1 w-full", accent === "amber" ? "bg-amber-300" : "bg-emerald-300")} />
       <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-[160px,1fr]">
-        <div className="h-32 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
-          {data.photoUrl ? (
-            <img src={data.photoUrl} alt={data.title} className="h-full w-full object-cover" />
+        <div className="h-28 sm:h-32 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
+          {resolvedUrl ? (
+            <img
+              src={resolvedUrl}
+              alt={data.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           ) : (
             <div className="flex h-full min-h-[120px] items-center justify-center text-zinc-400">
               <Cookie className="h-10 w-10" />
@@ -1093,7 +1146,11 @@ function CookieCard({
             <div className="flex items-center gap-2">
               <h4 ref={scrollRef} className="text-lg font-semibold text-zinc-900">
                 {data.title}
-                {data.pronounced && <span className="ml-2 text-xs font-normal text-zinc-500">({data.pronounced})</span>}
+                {data.pronounced && (
+                  <span className="ml-2 text-xs font-normal text-zinc-500">
+                    ({data.pronounced})
+                  </span>
+                )}
               </h4>
 
               {onToggleFavorite && (
@@ -1112,7 +1169,9 @@ function CookieCard({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">{data.country}</span>
+              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+                {data.country}
+              </span>
 
               {onDelete && (
                 <button
@@ -1131,7 +1190,9 @@ function CookieCard({
             </div>
           </div>
 
-          {data.alternateTitle && <p className="text-xs text-zinc-600">Also known as: {data.alternateTitle}</p>}
+          {data.alternateTitle && (
+            <p className="text-xs text-zinc-600">Also known as: {data.alternateTitle}</p>
+          )}
           {data.description && <p className="text-sm text-zinc-700">{data.description}</p>}
           {data.story && <p className="text-sm italic text-zinc-600">“{data.story}”</p>}
 
@@ -1139,7 +1200,9 @@ function CookieCard({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {data.ingredients && data.ingredients.length > 0 ? (
                 <div>
-                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Ingredients</h5>
+                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    Ingredients
+                  </h5>
                   <ul className="list-disc pl-5 text-sm text-zinc-700">
                     {ingredientsList.map((it, i) => (
                       <li key={i}>{it}</li>
@@ -1150,7 +1213,9 @@ function CookieCard({
 
               {data.steps && data.steps.length > 0 ? (
                 <div>
-                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Steps</h5>
+                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    Steps
+                  </h5>
                   <ol className="list-decimal pl-5 text-sm text-zinc-700">
                     {data.steps.map((it, i) => (
                       <li key={i}>{it}</li>
@@ -1168,7 +1233,9 @@ function CookieCard({
           {(data.culturalNote || data.birthdayTip || data.personalNote || data.passportStamp) && (
             <Card className="mt-3 border-dashed border-amber-200 bg-amber-50/40 p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {data.culturalNote && <p className="sm:col-span-2 text-xs italic text-zinc-700">“{data.culturalNote}”</p>}
+                {data.culturalNote && (
+                  <p className="sm:col-span-2 text-xs italic text-zinc-700">“{data.culturalNote}”</p>
+                )}
                 {data.birthdayTip && (
                   <p className="text-xs text-zinc-700">
                     <strong>Birthday Tip:</strong> {data.birthdayTip}
@@ -1195,105 +1262,105 @@ export default function CookieAccordTwoPane() {
   const [includeCommunity, setIncludeCommunity] = useState(true);
   const [showCommunity, setShowCommunity] = useState(false);
   const communityRef = useRef<HTMLDivElement | null>(null);
-  const [countryView, setCountryView] = useState<"countries" | "community">("countries");
-const [communityRows, setCommunityRows] = useState<CommunityCookieRow[]>([]);
-const [communityLoading, setCommunityLoading] = useState(false);
+  const [countryView, setCountryView] = useState<"countries" | "community">(
+    "countries"
+  );
 
-async function fetchCommunityCookies() {
-  setCommunityLoading(true);
-  const { data, error } = await supabase
-  .schema("public")
-  .from("cookies_community")
-  .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,owner_id,flagged,hidden,flagged_reason,created_at,updated_at")
-  .order("created_at", { ascending: false });
+  const [communityRows, setCommunityRows] = useState<CommunityCookieRow[]>([]);
+  const [communityLoading, setCommunityLoading] = useState(false);
 
-  if (error) {
-    console.error("fetchCommunityCookies error:", error);
-    setCommunityRows([]);
-  } else {
-    setCommunityRows(data ?? []);
-  }
-  setCommunityLoading(false);
-}
-useEffect(() => {
-  (async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      await supabase.auth.signInAnonymously();
+  async function fetchCommunityCookies() {
+    setCommunityLoading(true);
+    const { data, error } = await supabase
+      .schema("public")
+      .from("cookies_community")
+      .select(
+        "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at"
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("fetchCommunityCookies error:", error);
+      setCommunityRows([]);
+    } else {
+      setCommunityRows(data ?? []);
     }
-  })();
-}, []);
+    setCommunityLoading(false);
+  }
 
-useEffect(() => {
-  fetchCommunityCookies();
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        await supabase.auth.signInAnonymously();
+      }
+    })();
+  }, []);
 
-  const id = window.setInterval(() => {
+  useEffect(() => {
     fetchCommunityCookies();
-  }, 15000); // every 15 seconds (adjust)
 
-  return () => window.clearInterval(id);
-}, []);
+    const id = window.setInterval(() => {
+      fetchCommunityCookies();
+    }, 15000);
 
-const [currentUid, setCurrentUid] = useState<string | null>(null);
+    return () => window.clearInterval(id);
+  }, []);
 
-useEffect(() => {
-  (async () => {
-    const { data } = await supabase.auth.getSession();
-    const uid = data.session?.user?.id ?? null;
-    setCurrentUid(uid);
-  })();
-}, []);
+  const [currentUid, setCurrentUid] = useState<string | null>(null);
 
-// ✅ PASTE THE BRIDGE RIGHT HERE (inside component, before other useMemos that need it)
-const communityCookies = useMemo<CookieRow[]>(() => {
-  return communityRows.map((r) => ({
-    id: r.id,
-    country: r.country,
-    title: r.title,               // ✅ CookieRow requires title
-    ingredients: r.ingredients,
-    instructions: r.instructions,
-    notes: r.notes ?? "",
-    source_url: r.source_url ?? "",
-  }));
-}, [communityRows]);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const uid = data.session?.user?.id ?? null;
+      setCurrentUid(uid);
+    })();
+  }, []);
 
-// then your existing filtering logic can use communityCookies...
-
-
-// ✅ Step 3: build communityByCountry from Supabase communityRows
-const communityByCountry = useMemo(() => {
-  const m = new Map<string, CookieRow[]>();
-
-  for (const r of communityRows) {
-    const countryKey = r.country.trim() || "Unknown";
-
-    const ck: CookieRow = {
+  const communityCookies = useMemo<CookieRow[]>(() => {
+    return communityRows.map((r) => ({
       id: r.id,
       country: r.country,
       title: r.title,
-      ingredients: r.ingredients,
-      instructions: r.instructions,
-      // only keep these if CookieRow supports them
-      notes: r.notes ?? "",
-      source_url: r.source_url ?? "",
-    } as any;
+      // normalize DB strings -> arrays for UI
+      ingredients: String(r.ingredients ?? "")
+        .split(/\r?\n|,\s*/g)
+        .map((s) => s.trim())
+        .filter(Boolean),
+      steps: String(r.instructions ?? "")
+        .split(/\r?\n/g)
+        .map((s) => s.trim())
+        .filter(Boolean),
+      story: (r.notes ?? "") as any,
+      sourceUrl: (r.source_url ?? "") as any,
+      submitterName: (r.submitter_name ?? "") as any,
+      photo_url: (r.photo_url ?? null) as any, // keep snake_case too
+      photoUrl: (r.photo_url ?? null) as any,  // and camelCase for UI
+      owner_id: (r.owner_id ?? null) as any,
+    })) as any;
+  }, [communityRows]);
 
-    const arr = m.get(countryKey) ?? [];
-    arr.push(ck);
-    m.set(countryKey, arr);
-  }
+  const communityByCountry = useMemo(() => {
+    const m = new Map<string, CookieRow[]>();
 
-  return m;
-}, [communityRows]);
+    for (const ck of communityCookies) {
+      const countryKey = (ck.country || "").trim() || "Unknown";
+      const arr = m.get(countryKey) ?? [];
+      arr.push(ck);
+      m.set(countryKey, arr);
+    }
 
-  // Country list filter mode (curated/community)
+    return m;
+  }, [communityCookies]);
+
   type CountryListMode = "all" | "curated" | "community";
-  const [countryListMode, setCountryListMode] = useState<CountryListMode>("all");
+  const [countryListMode, setCountryListMode] =
+    useState<CountryListMode>("all");
 
-  // Keep community recipes in state so UI updates instantly (no reloads)
-  const [userRecipes, setUserRecipes] = useState<CookieRow[]>(() => loadUserRecipes());
+  const [userRecipes, setUserRecipes] = useState<CookieRow[]>(() =>
+    loadUserRecipes()
+  );
 
-  // Listen for updates (so other pages/components can trigger refresh too)
   useEffect(() => {
     const sync = () => setUserRecipes(loadUserRecipes());
 
@@ -1306,7 +1373,6 @@ const communityByCountry = useMemo(() => {
     };
   }, []);
 
-  // scroll into view when a cookie is opened
   useEffect(() => {
     if (!selectedCookie || !detailsRef.current) return;
 
@@ -1342,7 +1408,6 @@ const communityByCountry = useMemo(() => {
     }
   });
 
-  // Delete latest submission (scope-safe)
   function deleteUserSubmission(id: string) {
     const updatedRecipes = loadUserRecipes().filter((r) => r.id !== id);
     saveUserRecipes(updatedRecipes);
@@ -1357,151 +1422,208 @@ const communityByCountry = useMemo(() => {
     window.dispatchEvent(new Event("cookieaccord:storage-updated"));
   }
 
-  // Delete from community list (left panel ✕)
   const handleDeleteCommunity = async (id: string) => {
-  const ok = window.confirm("Delete your submitted recipe?");
-  if (!ok) return;
+    const ok = window.confirm("Delete your submitted recipe?");
+    if (!ok) return;
 
-  const { error } = await supabase
-    .schema("public")
-    .from("cookies_community")
-    .delete()
-    .eq("id", id);
+    const { error } = await supabase
+      .schema("public")
+      .from("cookies_community")
+      .delete()
+      .eq("id", id);
 
-  if (error) {
-    console.error("Supabase delete failed:", error);
-    alert(`Delete failed: ${error.message}`);
-    return;
-  }
+    if (error) {
+      console.error("Supabase delete failed:", error);
+      alert(`Delete failed: ${error.message}`);
+      return;
+    }
 
-  // Optimistic UI update (your 15s poll also keeps it in sync)
-  setCommunityRows((prev) => prev.filter((r) => r.id !== id));
-};
+    setCommunityRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  // inside CookieAccordTwoPane() component (top area with other helpers)
+
+// Auth helper (component-scope)
 async function ensureAnonSession(): Promise<string> {
-  // 1) Try existing session
   const { data: s1, error: e1 } = await supabase.auth.getSession();
   if (e1) throw e1;
 
-  const uid1 = s1.session?.user?.id;
+  const uid1 = s1?.session?.user?.id;
   if (uid1) return uid1;
 
-  // 2) Create anonymous session
-  const { data: s2, error: e2 } = await supabase.auth.signInAnonymously();
+  const { error: e2 } = await supabase.auth.signInAnonymously();
   if (e2) throw e2;
 
-  const uid2 = s2.session?.user?.id;
+  const { data: s3, error: e3 } = await supabase.auth.getSession();
+  if (e3) throw e3;
+
+  const uid2 = s3?.session?.user?.id;
   if (!uid2) throw new Error("Auth session missing (anonymous sign-in failed).");
 
   return uid2;
 }
 
-  // When someone submits: require login + save to Supabase (shared) + update state
-const handleSubmittedCookie = async (row: CookieRow) => {
-  try {
-    // 1) Require sign-in
-    const { data: userRes, error: userErr } = await supabase.auth.getUser();
-    if (userErr) throw userErr;
+// When someone submits: save to Supabase (shared) + update state
+async function handleSubmittedCookie(row: CookieRow) {
+  const uploadToCookiePhotos = async (fileOrBlob: Blob, ownerId: string) => {
+    const contentType = (fileOrBlob as any)?.type || "image/jpeg";
+    // ... rest of upload helper ...
+  };
 
-    const user = userRes?.user;
-    if (!user) {
-      alert("Please sign in to submit a recipe. 💛");
+  try {
+    const ownerId = await ensureAnonSession();
+    // ... rest of submit logic ...
+  } catch (err: any) {
+    // ... error handling ...
+  }
+}
+
+ // When someone submits: save to Supabase (shared) + update state
+async function handleSubmittedCookie(row: CookieRow) {
+  const uploadToCookiePhotos = async (fileOrBlob: Blob, ownerId: string) => {
+    const contentType = (fileOrBlob as any)?.type || "image/jpeg";
+
+    const ext =
+      contentType === "image/png"
+        ? "png"
+        : contentType === "image/webp"
+        ? "webp"
+        : contentType === "image/gif"
+        ? "gif"
+        : "jpg";
+
+    const fileName = `${crypto.randomUUID()}.${ext}`;
+    const path = `${ownerId}/${fileName}`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from("photos")
+      .upload(path, fileOrBlob, {
+        upsert: false,
+        contentType,
+        cacheControl: "3600",
+      });
+
+    if (uploadErr) throw uploadErr;
+    return path;
+  };
+
+  try {
+    const ownerId = await ensureAnonSession();
+    if (!ownerId) {
+      alert("Session not ready yet. Please refresh and try again.");
       return;
     }
 
-    // 2) Normalize input (keep your defaults)
     const normalized: CookieRow = {
       ...row,
       country: row.country || "Somewhere",
       ingredients: row.ingredients || [],
-      steps: row.steps || [],
-      tags: row.tags || [],
-      photoUrl: row.photoUrl || "",
-    };
+      steps: (row as any).steps || [],
+      tags: (row as any).tags || [],
+      photoUrl: (row as any).photoUrl || (row as any).photo_url || "",
+    } as any;
 
-    // 3) Insert into Supabase community table
-    // Map your CookieRow shape -> table shape.
-    // (Adjust column names if your table uses different ones.)
+    // Photo -> Storage path (or keep https URL)
+    let storedPhotoValue: string | null = null;
 
-const { data: sessionData } = await supabase.auth.getSession();
-const ownerId = await ensureAnonSession();
+    const maybeFile: File | undefined = (row as any).photoFile;
+    const rawPhotoUrl =
+      normalized.photoUrl?.trim?.() ? normalized.photoUrl.trim() : "";
 
-if (!ownerId) {
-  alert("Session not ready yet. Please refresh and try again.");
-  return;
-}
-  
- const payload = {
-  title: String(normalized.title || "Untitled Cookie").trim(),
-  country: String(normalized.country || "").trim(),
-  ingredients: String(
-    Array.isArray(normalized.ingredients)
-      ? normalized.ingredients.join("\n")
-      : normalized.ingredients ?? ""
-  ).trim(),
-  instructions: String(
-    Array.isArray(normalized.steps)
-      ? normalized.steps.join("\n")
-      : normalized.steps ?? ""
-  ).trim(),
-  notes: normalized.story?.trim?.() ? normalized.story.trim() : null,
-  source_url: normalized.sourceUrl?.trim?.() ? normalized.sourceUrl.trim() : null,
-  submitter_name: normalized.submitterName?.trim?.() ? normalized.submitterName.trim() : null,
-  owner_id: ownerId,
-};  // ← THIS LINE MUST EXIST
-
-// 👇 everything below must be OUTSIDE the object
-if (payload.title.length < 2) return alert("Please add a cookie title.");
-if (payload.country.length < 2) return alert("Please choose a country.");
-if (payload.ingredients.length < 10) return alert("Please add a bit more to ingredients (10+ chars).");
-if (payload.instructions.length < 10) return alert("Please add a bit more to instructions (10+ chars).");
-
-const { data: inserted, error: insertErr } = await supabase
-  .schema("public")
-  .from("cookies_community")
-  .insert(payload)
-  .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,created_at,updated_at")
-  .single();
-
-if (insertErr) throw insertErr;
-
-// Instant UI update
-setCommunityRows((prev) => [inserted, ...prev]);
-
-// Optional: show/open it
-setSubmitted({
-  id: inserted.id,
-  title: inserted.title,
-  country: inserted.country,
-  ingredients: inserted.ingredients,
-  instructions: inserted.instructions,
-  notes: inserted.notes ?? "",
-  source_url: inserted.source_url ?? "",
-} as any);
-
-    // 5) Update local UI state
-    // If you have a separate community state array, update that here.
-    // If you're reusing userRecipes, this keeps your existing UI behavior.
-    const existing = loadUserRecipes();
-    const updated = [inserted, ...existing];
-    saveUserRecipes(updated);
-    setUserRecipes(updated);
-
-    // 6) Save story locally too (optional)
-    // If you later move Stories to Supabase, we’ll refactor this part.
-    if (inserted.story && inserted.story.trim()) {
-      const newStory: StoryItem = {
-        id: inserted.id,
-        name: "Anonymous",
-        location: inserted.country || "Somewhere Cozy",
-        cookieName:inserted.title || "Untitled Cookie",
-        story: inserted.story.trim(),
-      };
-      const existingStories = loadUserStories();
-      saveUserStories([...existingStories, newStory]);
+    if (maybeFile) {
+      storedPhotoValue = await uploadToCookiePhotos(maybeFile, ownerId);
+    } else if (rawPhotoUrl) {
+      if (rawPhotoUrl.startsWith("data:image/")) {
+        const res = await fetch(rawPhotoUrl);
+        const blob = await res.blob();
+        storedPhotoValue = await uploadToCookiePhotos(blob, ownerId);
+      } else if (rawPhotoUrl.startsWith("blob:")) {
+        const res = await fetch(rawPhotoUrl);
+        const blob = await res.blob();
+        storedPhotoValue = await uploadToCookiePhotos(blob, ownerId);
+      } else if (/^https?:\/\//i.test(rawPhotoUrl)) {
+        storedPhotoValue = rawPhotoUrl;
+      }
     }
 
-    setSubmitted(inserted);
-    setSelectedCookie(inserted);
+    const photo_url =
+      storedPhotoValue && storedPhotoValue.trim()
+        ? storedPhotoValue.trim()
+        : null;
+
+    const payload = {
+      title: String((normalized as any).title || "Untitled Cookie").trim(),
+      country: String(normalized.country || "").trim(),
+      ingredients: String(
+        Array.isArray(normalized.ingredients)
+          ? normalized.ingredients.join("\n")
+          : (normalized as any).ingredients ?? ""
+      ).trim(),
+      instructions: String(
+        Array.isArray((normalized as any).steps)
+          ? (normalized as any).steps.join("\n")
+          : (normalized as any).steps ?? ""
+      ).trim(),
+      notes: (normalized as any).story?.trim?.()
+        ? (normalized as any).story.trim()
+        : null,
+      source_url: (normalized as any).sourceUrl?.trim?.()
+        ? (normalized as any).sourceUrl.trim()
+        : null,
+      submitter_name: (normalized as any).submitterName?.trim?.()
+        ? (normalized as any).submitterName.trim()
+        : null,
+      owner_id: ownerId,
+      photo_url,
+    };
+
+    if (payload.title.length < 2) return alert("Please add a cookie title.");
+    if (payload.country.length < 2) return alert("Please choose a country.");
+    if (payload.ingredients.length < 10)
+      return alert("Please add a bit more to ingredients (10+ chars).");
+    if (payload.instructions.length < 10)
+      return alert("Please add a bit more to instructions (10+ chars).");
+
+    const { data: inserted, error: insertErr } = await supabase
+      .schema("public")
+      .from("cookies_community")
+      .insert(payload)
+      .select(
+        "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,created_at,updated_at"
+      )
+      .single();
+
+    if (insertErr) throw insertErr;
+    if (!inserted) throw new Error("Insert returned no row.");
+
+    setCommunityRows((prev) => [inserted as any, ...prev]);
+
+    const insertedForUI: CookieRow = {
+      id: inserted.id,
+      title: inserted.title,
+      country: inserted.country,
+      ingredients: String((inserted as any).ingredients ?? "")
+        .split(/\r?\n|,\s*/g)
+        .map((s) => s.trim())
+        .filter(Boolean),
+      steps: String((inserted as any).instructions ?? "")
+        .split(/\r?\n/g)
+        .map((s) => s.trim())
+        .filter(Boolean),
+      story: (inserted as any).notes ?? "",
+      sourceUrl: (inserted as any).source_url ?? "",
+      submitterName: (inserted as any).submitter_name ?? "",
+      photoUrl: (inserted as any).photo_url ?? null,
+      photo_url: (inserted as any).photo_url ?? null,
+    } as any;
+
+    setSubmitted(insertedForUI);
+    setSelectedCookie(insertedForUI);
+
+    const existing = loadUserRecipes();
+    const updated = [insertedForUI, ...existing];
+    saveUserRecipes(updated);
+    setUserRecipes(updated);
 
     window.dispatchEvent(new Event("cookieaccord:storage-updated"));
 
@@ -1509,19 +1631,19 @@ setSubmitted({
       "Thank you for sharing! Your recipe is now saved to the community.\nYou can also see it in this browser under Recipes, and your story in Stories."
     );
   } catch (err: any) {
-  console.error("handleSubmittedCookie error:", err);
+    console.error("handleSubmittedCookie error:", err);
 
-  const msg =
-    err?.message ||
-    err?.error_description ||
-    err?.details ||
-    err?.hint ||
-    (typeof err === "string" ? err : JSON.stringify(err, null, 2));
+    const msg =
+      err?.message ||
+      err?.error_description ||
+      err?.details ||
+      err?.hint ||
+      (typeof err === "string" ? err : JSON.stringify(err, null, 2));
 
-  alert(`Submit failed: ${msg}`);
+    alert(`Submit failed: ${msg}`);
+  }
 }
 
-};
 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -1537,7 +1659,10 @@ setSubmitted({
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
-        window.localStorage.setItem("cookie-favorites", JSON.stringify(favorites));
+        window.localStorage.setItem(
+          "cookie-favorites",
+          JSON.stringify(favorites)
+        );
       }
     } catch {
       // ignore storage errors
@@ -1551,44 +1676,54 @@ setSubmitted({
 
   function toggleFavorite(row: CookieRow) {
     if (!row.id) return;
-    setFavorites((prev) => (prev.includes(row.id) ? prev.filter((x) => x !== row.id) : [...prev, row.id]));
+    setFavorites((prev) =>
+      prev.includes(row.id) ? prev.filter((x) => x !== row.id) : [...prev, row.id]
+    );
   }
 
-  // ---------- ONE unified search query (curated + community) ----------
-    
-  const [searchQuery, setSearchQuery] = useState("");
+   // ---------- ONE unified search query (curated + community) ----------
 
-  const matchesQuery = (c: CookieRow, qRaw: string) => {
-    const q = qRaw.trim().toLowerCase();
-    if (!q) return true;
+const [searchQuery, setSearchQuery] = useState("");
 
-    const ingredientsText = Array.isArray(c.ingredients) ? c.ingredients.join(" ") : "";
-    const stepsText = Array.isArray(c.steps) ? c.steps.join(" ") : "";
-    const tagsText = Array.isArray(c.tags) ? c.tags.join(" ") : "";
+const matchesQuery = (c: CookieRow, qRaw: string) => {
+  const q = qRaw.trim().toLowerCase();
+  if (!q) return true;
 
-    const hay = [
-      c.title,
-      c.alternateTitle,
-      c.country,
-      c.pronounced,
-      c.region,
-      c.language,
-      c.flagFunFact,
-      c.culturalNote,
-      c.personalNote,
-      c.birthdayTip,
-      c.story,
-      c.description,
-      ingredientsText,
-      stepsText,
-      tagsText,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+  const ingredientsText = Array.isArray(c.ingredients)
+    ? c.ingredients.join(" ")
+    : "";
 
-    return hay.includes(q);
-  };
+  const stepsText = Array.isArray(c.steps)
+    ? c.steps.join(" ")
+    : "";
+
+  const tagsText = Array.isArray(c.tags)
+    ? c.tags.join(" ")
+    : "";
+
+  const hay = [
+    c.title ?? "",
+    c.alternateTitle ?? "",
+    c.country ?? "",
+    c.pronounced ?? "",
+    c.region ?? "",
+    c.language ?? "",
+    c.flagFunFact ?? "",
+    c.culturalNote ?? "",
+    c.personalNote ?? "",
+    c.birthdayTip ?? "",
+    c.story ?? "",
+    c.description ?? "",
+    ingredientsText,
+    stepsText,
+    tagsText,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return hay.includes(q);
+};
 
   const curatedFiltered = useMemo(() => {
     const base = showFavoritesOnly ? data.filter((r) => isFavorite(r.id)) : data;

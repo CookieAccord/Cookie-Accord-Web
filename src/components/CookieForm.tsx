@@ -30,7 +30,7 @@ export default function CookieForm() {
   const firstErrorRef = React.useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>(null);
 
   const limits = { title: 80, story: 600, steps: 2000 };
-  const titleCount = `${form.title.length}/${limits.title}`;
+  const titleCount = `${form.title.length}/${limits`;
   const storyCount = `${form.story.length}/${limits.story}`;
   const stepsCount = `${form.steps.length}/${limits.steps}`;
 
@@ -48,7 +48,7 @@ export default function CookieForm() {
     if (!values.ingredients.trim()) e.ingredients = "Add at least one ingredient.";
     if (!values.steps.trim()) e.steps = "Tell us how to make it.";
     if (!values.consent) e.consent = "Please agree to share kindly & originally.";
-    if (values.title.length > limits.title) e.title = `Keep title under ${limits.title} characters.`;
+    if (values.title.length > limits.title) e.title = `Keep title under ${limits characters.`;
     if (values.story.length > limits.story) e.story = `Keep story under ${limits.story} characters.`;
     return e;
   }
@@ -133,16 +133,16 @@ export default function CookieForm() {
                 errors.title ? errorRing : ""
               }`}
               placeholder="e.g., Peace Shortbread"
-              value={form.title}
+              value={form
               onChange={onChange("title")}
-              aria-invalid={!!errors.title}
+              aria-invalid={!!errors
               aria-describedby={errors.title ? "title-error" : undefined}
             // @ts-ignore – shared ref for first error across different field types  
               ref={!form.title && errors.title ? firstErrorRef : null}
             />
             {errors.title && (
               <p id="title-error" className="mt-1 text-xs text-red-600">
-                {errors.title}
+                {errors
               </p>
             )}
           </div>
@@ -331,7 +331,7 @@ export default function CookieForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-base font-semibold">{submittedData.title}</p>
+              <p className="text-base font-semibold">{submittedData</p>
               <p className="text-zinc-700">
                 {submittedData.country || "—"} {submittedData.theme ? `• ${submittedData.theme}` : ""}
               </p>
