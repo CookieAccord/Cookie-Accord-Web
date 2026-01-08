@@ -1241,7 +1241,7 @@ const storyText = data.story?.trim?.();
 
 {storyText ? (
   <Card
-    className="mt-3 mx-auto w-full sm:max-w-xl border border-zinc-200 bg-white/70 p-3"
+    className="mt-3 mx-auto w-full sm:max-w-x2 border border-zinc-200 bg-white/70 p-3"
     onClick={(e) => e.stopPropagation()}
   >
     <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
