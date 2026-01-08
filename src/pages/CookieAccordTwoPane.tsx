@@ -886,30 +886,32 @@ function SubmissionForm({ onSubmit }: { onSubmit: (row: CookieRow) => void }) {
   }, [story, title]);
 
   const preview: CookieRow | null =
-    title || country || story || ingredients || steps || photoUrl || photoData
-      ? {
-          id: draftIdRef.current,
-          title: title || "Untitled Cookie",
-          country: country || "Unknown",
-          story,
-          description: story ? story.slice(0, 120) : undefined,
-          ingredients: ingredients
-            ? ingredients
-                .split(/\r?\n/)
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          steps: steps
-            ? steps
-                .split(/\r?\n/)
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          tags,
-          // ✅ NEW: prefer uploaded image; fallback to URL
-          photoUrl: (photoData || photoUrl || undefined) as any,
-        }
-      : null;
+  title || country || story || ingredients || steps || photoUrl || photoData
+    ? {
+        id: draftIdRef.current,
+        title: title || "Untitled Cookie",
+        country: country || "Unknown",
+        story,
+        description: story ? story.slice(0, 120) : undefined,
+        ingredients: ingredients
+          ? ingredients
+              .split(/\r?\n/)
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [],
+        steps: steps
+          ? steps
+              .split(/\r?\n/)
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [],
+        tags,
+        // preview can show base64/blob, handler will upload + store path
+        photoUrl: photoData ?? (photoUrl?.trim() ? photoUrl.trim() : null),
+        photo_url: photoData ?? (photoUrl?.trim() ? photoUrl.trim() : null),
+      }
+    : null;
+
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -1078,6 +1080,9 @@ function CookieCard({
         .split(/\r?\n|,\s*/g)
         .map((s) => s.trim())
         .filter(Boolean);
+        
+// ---------------- Story / Notes (below recipe) ----------------
+const storyText = data.story?.trim?.();
 
   // Accept both snake_case + camelCase
   const rawPhoto =
@@ -1168,33 +1173,37 @@ function CookieCard({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-                {data.country}
-              </span>
+            <div className="flex items-center gap-1">
+  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+    {data.country}
+  </span>
 
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(data);
-                  }}
-                  className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-[11px] text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700"
-                  aria-label="Delete this submission"
-                  title="Delete"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
+  {onClose && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
+      aria-label="Close recipe"
+      title="Close"
+      className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+    >
+      ×
+    </button>
+  )}
+</div>
           </div>
 
           {data.alternateTitle && (
             <p className="text-xs text-zinc-600">Also known as: {data.alternateTitle}</p>
           )}
           {data.description && <p className="text-sm text-zinc-700">{data.description}</p>}
-          {data.story && <p className="text-sm italic text-zinc-600">“{data.story}”</p>}
+          {data.story && (
+  <p className="text-sm italic text-zinc-600 whitespace-pre-line">
+    “{data.story}”
+  </p>
+)}
 
           {(data.ingredients && data.ingredients.length > 0) || (data.steps && data.steps.length > 0) ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1229,6 +1238,20 @@ function CookieCard({
               No steps yet for this recipe. Add your tips on the right and we’ll include them!
             </div>
           )}
+
+{storyText ? (
+  <Card
+    className="mt-3 mx-auto w-full sm:max-w-xl border border-zinc-200 bg-white/70 p-3"
+    onClick={(e) => e.stopPropagation()}
+  >
+    <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+      Cookie Story
+    </h5>
+    <p className="text-sm text-zinc-700 whitespace-pre-line">
+      {storyText}
+    </p>
+  </Card>
+) : null}
 
           {(data.culturalNote || data.birthdayTip || data.personalNote || data.passportStamp) && (
             <Card className="mt-3 border-dashed border-amber-200 bg-amber-50/40 p-3">
@@ -1274,9 +1297,9 @@ export default function CookieAccordTwoPane() {
     const { data, error } = await supabase
       .schema("public")
       .from("cookies_community")
-      .select(
-        "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at"
-      )
+      .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at")
+.eq("hidden", false)
+
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -1331,7 +1354,7 @@ export default function CookieAccordTwoPane() {
         .split(/\r?\n/g)
         .map((s) => s.trim())
         .filter(Boolean),
-      story: (r.notes ?? "") as any,
+      story: r.notes ?? "",
       sourceUrl: (r.source_url ?? "") as any,
       submitterName: (r.submitter_name ?? "") as any,
       photo_url: (r.photo_url ?? null) as any, // keep snake_case too
@@ -1423,23 +1446,24 @@ export default function CookieAccordTwoPane() {
   }
 
   const handleDeleteCommunity = async (id: string) => {
-    const ok = window.confirm("Delete your submitted recipe?");
-    if (!ok) return;
+  const ok = window.confirm("Remove your recipe from the community?");
+  if (!ok) return;
 
-    const { error } = await supabase
-      .schema("public")
-      .from("cookies_community")
-      .delete()
-      .eq("id", id);
+  const { error } = await supabase
+    .schema("public")
+    .from("cookies_community")
+    .update({ hidden: true })
+    .eq("id", id);
 
-    if (error) {
-      console.error("Supabase delete failed:", error);
-      alert(`Delete failed: ${error.message}`);
-      return;
-    }
+  if (error) {
+    console.error("Supabase hide failed:", error);
+    alert(`Remove failed: ${error.message}`);
+    return;
+  }
 
-    setCommunityRows((prev) => prev.filter((r) => r.id !== id));
-  };
+  // Optimistic UI update
+  setCommunityRows((prev) => prev.filter((r) => r.id !== id));
+};
 
   // inside CookieAccordTwoPane() component (top area with other helpers)
 
