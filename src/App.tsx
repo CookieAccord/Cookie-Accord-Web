@@ -8,10 +8,18 @@ import AboutCookieAccord from "./pages/AboutCookieAccord";
 import Contact from "./pages/Contact";
 import Purchase from "./pages/Purchase";
 import MeNSol from "./pages/MeNSol";
+import { useVisitorCounter } from "./lib/useVisitorCounter";
+
+function VisitorCounter() {
+  useVisitorCounter();
+  return null;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+      <VisitorCounter />
+
       <Routes>
         <Route element={<RootLayout />}>
           <Route path="/" element={<CookieAccordTwoPane />} />
