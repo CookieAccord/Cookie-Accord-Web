@@ -570,6 +570,7 @@ function CountryPicker({
   mode,
   view,
   setView,
+  currentUid,
 }: {
   favorites: string[];
   onPick: (cookie: CookieRow) => void;
@@ -578,9 +579,11 @@ function CountryPicker({
   communityByCountry: Map<string, CookieRow[]>;
   onDeleteCommunity: (id: string) => void;
   mode: "all" | "curated" | "community";
-  view: "countries" | "community";
-  setView: (v: "countries" | "community") => void; // ✅ parent setter
+  view: "all" | "curated" | "community"; // or whatever your union is
+  setView: (v: "all" | "curated" | "community") => void;
+  currentUid: string | null;
 }) {
+
   // Helper: NO hooks inside
 
 const getPhotoUrl = (ck: CookieRow) =>
@@ -792,7 +795,7 @@ const getPhotoUrl = (ck: CookieRow) =>
                       </div>
                     )}
 
-                    {/* Shared by the Community */}
+                   {/* Shared by the Community */}
 <div className="space-y-2">
   <div className="flex items-center gap-2">
     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
@@ -800,10 +803,15 @@ const getPhotoUrl = (ck: CookieRow) =>
     </span>
   </div>
 
-    {community.length > 0 ? (
+  {community.length > 0 ? (
     <div className="space-y-1">
       {community.map((ck) => {
         const fav = favorites.includes(ck.id);
+
+        const canDelete =
+  !!currentUid &&
+  (ck as any).owner_id != null &&
+  String((ck as any).owner_id) === String(currentUid);
 
         return (
           <div key={ck.id} className="flex items-center justify-between gap-2">
@@ -818,36 +826,44 @@ const getPhotoUrl = (ck: CookieRow) =>
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => onToggleFavorite(ck)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite(ck);
+                }}
                 className="rounded-full p-1 hover:bg-emerald-50"
                 aria-label={fav ? "Remove from favorites" : "Add to favorites"}
                 title={fav ? "Remove from favorites" : "Add to favorites"}
               >
                 <Heart
                   className={
-                    fav ? "h-4 w-4 fill-red-500 text-red-500" : "h-4 w-4 text-zinc-400"
+                    fav
+                      ? "h-4 w-4 fill-red-500 text-red-500"
+                      : "h-4 w-4 text-zinc-400"
                   }
                 />
               </button>
 
-              <button
-                type="button"
-                onClick={() => onDeleteCommunity(ck.id)}
-                className="rounded-full p-1 hover:bg-zinc-100"
-                aria-label="Delete this shared recipe"
-                title="Delete"
-              >
-                ✕
-              </button>
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteCommunity(ck.id);
+                  }}
+                  className="rounded-full p-1 hover:bg-zinc-100"
+                  aria-label="Remove your shared recipe"
+                  title="Remove your recipe"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
         );
       })}
     </div>
   ) : (
-    <p className="text-xs text-zinc-500">
-      No community recipes yet (on this device).
-    </p>
+    <p className="text-xs text-zinc-500">No community recipes yet (on this device).</p>
   )}
 </div>
 
@@ -1293,23 +1309,26 @@ export default function CookieAccordTwoPane() {
   const [communityLoading, setCommunityLoading] = useState(false);
 
   async function fetchCommunityCookies() {
-    setCommunityLoading(true);
-    const { data, error } = await supabase
-      .schema("public")
-      .from("cookies_community")
-      .select("id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at")
-.eq("hidden", false)
+  setCommunityLoading(true);
 
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .schema("public")
+    .from("cookies_community")
+    .select(
+      "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at"
+    )
+    .eq("hidden", false)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("fetchCommunityCookies error:", error);
-      setCommunityRows([]);
-    } else {
-      setCommunityRows(data ?? []);
-    }
-    setCommunityLoading(false);
+  if (error) {
+    console.error("fetchCommunityCookies error:", error);
+    setCommunityRows([]);
+  } else {
+    setCommunityRows((data ?? []) as any);
   }
+
+  setCommunityLoading(false);
+}
 
   useEffect(() => {
     (async () => {
@@ -1449,20 +1468,28 @@ export default function CookieAccordTwoPane() {
   const ok = window.confirm("Remove your recipe from the community?");
   if (!ok) return;
 
-  const { error } = await supabase
-    .schema("public")
-    .from("cookies_community")
-    .update({ hidden: true })
-    .eq("id", id);
+  try {
+    const uid = await ensureAnonSession();
 
-  if (error) {
-    console.error("Supabase hide failed:", error);
-    alert(`Remove failed: ${error.message}`);
-    return;
+    const { error } = await supabase
+      .schema("public")
+      .from("cookies_community")
+      .update({ hidden: true })
+      .eq("id", id)
+      .eq("owner_id", uid);
+
+    if (error) {
+      console.error("Supabase hide failed:", error);
+      alert(`Remove failed: ${error.message}`);
+      return;
+    }
+
+    // Optimistic UI update
+    setCommunityRows((prev) => prev.filter((r) => r.id !== id));
+  } catch (err: any) {
+    console.error("handleDeleteCommunity error:", err);
+    alert(`Remove failed: ${err?.message || String(err)}`);
   }
-
-  // Optimistic UI update
-  setCommunityRows((prev) => prev.filter((r) => r.id !== id));
 };
 
   // inside CookieAccordTwoPane() component (top area with other helpers)
@@ -1599,6 +1626,7 @@ async function handleSubmittedCookie(row: CookieRow) {
         : null,
       owner_id: ownerId,
       photo_url,
+      hidden: false,
     };
 
     if (payload.title.length < 2) return alert("Please add a cookie title.");
@@ -1701,7 +1729,7 @@ async function handleSubmittedCookie(row: CookieRow) {
   function toggleFavorite(row: CookieRow) {
     if (!row.id) return;
     setFavorites((prev) =>
-      prev.includes(row.id) ? prev.filter((x) => x !== row.id) : [...prev, row.id]
+      prev.includes(row.id) ? prev.filter((x) => close !== row.id) : [...prev, row.id]
     );
   }
 
@@ -1912,7 +1940,9 @@ const matchesQuery = (c: CookieRow, qRaw: string) => {
   mode={includeCommunity ? "all" : "curated"}
   view={countryView}
   setView={setCountryView}
+  currentUid={currentUid}
 />
+
               </Card>
             </motion.div>
 
