@@ -117,10 +117,13 @@ const missing = allCountries.filter(
 );
 
 // NOTE: If these logs annoy you in production, wrap with `if (import.meta.env.DEV)`.
-console.log("Countries missing from countries.json:", missing);
-console.log("Number missing:", missing.length);
 export const countryCount = new Set(allCountries).size;
-console.log("Distinct countries in RAW:", countryCount);
+
+if (import.meta.env.DEV) {
+  console.log("Countries missing from countries.json:", missing);
+  console.log("Number missing:", missing.length);
+  console.log("Distinct countries in RAW:", countryCount);
+}
 
 // ------------------------------- Sample Data (fallback) -------------------------------
 const SAMPLE_DATA: CookieRow[] = [
@@ -579,8 +582,8 @@ function CountryPicker({
   communityByCountry: Map<string, CookieRow[]>;
   onDeleteCommunity: (id: string) => void;
   mode: "all" | "curated" | "community";
-  view: "all" | "curated" | "community"; // or whatever your union is
-  setView: (v: "all" | "curated" | "community") => void;
+  view: "countries" | "community";
+  setView: (v: "countries" | "community") => void;
   currentUid: string | null;
 }) {
 
@@ -863,7 +866,7 @@ const getPhotoUrl = (ck: CookieRow) =>
       })}
     </div>
   ) : (
-    <p className="text-xs text-zinc-500">No community recipes yet (on this device).</p>
+    <p className="text-xs text-zinc-500">No community recipes yet.</p>
   )}
 </div>
 
@@ -1090,53 +1093,75 @@ function CookieCard({
   onDelete?: (cookie: CookieRow) => void;
   canDelete?: boolean;
 }) {
-  const ingredientsList = Array.isArray(data.ingredients)
-    ? data.ingredients
-    : String(data.ingredients ?? "")
+  // ✅ Prevent crash if anything is unexpectedly missing
+  const safeTitle = String((data as any)?.title ?? "Untitled Cookie");
+
+  const ingredientsList = Array.isArray((data as any)?.ingredients)
+    ? ((data as any)?.ingredients as string[])
+    : String((data as any)?.ingredients ?? "")
         .split(/\r?\n|,\s*/g)
         .map((s) => s.trim())
         .filter(Boolean);
-        
-// ---------------- Story / Notes (below recipe) ----------------
-const storyText = data.story?.trim?.();
 
-  // Accept both snake_case + camelCase
-  const rawPhoto =
-    (data.photo_url?.trim?.() ? data.photo_url.trim() : "") ||
-    (data.photoUrl?.trim?.() ? data.photoUrl.trim() : "");
+  // ✅ FIX 1: define storyText (this was causing the white screen)
+  const storyText = String(
+    (data as any)?.notes ??
+      (data as any)?.story ??
+      "" // fallback
+  ).trim();
 
-  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  // ------------------------------- Cookie Card Photo Resolver -------------------------------
+ const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    let alive = true;
+useEffect(() => {
+  let alive = true;
 
-    (async () => {
-      if (!rawPhoto) {
-        if (alive) setResolvedUrl(null);
-        return;
-      }
+  (async () => {
+    try {
+      const d: any = data as any;
 
-      // Already a usable URL/data URL
+      const url = String(d?.photo_url ?? d?.photoUrl ?? "").trim();
+      const path = String(d?.photo_path ?? d?.photoPath ?? "").trim();
+
+      // 1) Directly usable URL (includes curated / local / base64)
       if (
-        /^https?:\/\//i.test(rawPhoto) ||
-        rawPhoto.startsWith("data:image/") ||
-        rawPhoto.startsWith("blob:")
+        url &&
+        (/^https?:\/\//i.test(url) ||
+          url.startsWith("data:image/") ||
+          url.startsWith("blob:") ||
+          url.startsWith("/"))
       ) {
-        if (alive) setResolvedUrl(rawPhoto);
+        if (alive) setResolvedUrl(url);
         return;
       }
 
-      // Otherwise treat as Storage path in bucket "photos" (public)
-      const { data: pub } = supabase.storage.from("photos").getPublicUrl(rawPhoto);
-      const url = pub?.publicUrl || null;
+      // 2) Storage path -> public URL
+      if (path) {
+        const { data: pub } = supabase.storage
+          .from("photos") // ✅ must match upload bucket
+          .getPublicUrl(path);
 
-      if (alive) setResolvedUrl(url);
-    })();
+        if (alive) setResolvedUrl(pub?.publicUrl ?? null);
+        return;
+      }
 
-    return () => {
-      alive = false;
-    };
-  }, [rawPhoto]);
+      // 3) Nothing
+      if (alive) setResolvedUrl(null);
+    } catch (e) {
+      console.error("Photo resolve failed:", e);
+      if (alive) setResolvedUrl(null);
+    }
+  })();
+
+  return () => {
+    alive = false;
+  };
+}, [
+  (data as any)?.photo_url,
+  (data as any)?.photoUrl,
+  (data as any)?.photo_path,
+  (data as any)?.photoPath,
+]);
 
   return (
     <Card
@@ -1151,25 +1176,26 @@ const storyText = data.story?.trim?.();
           {resolvedUrl ? (
             <img
               src={resolvedUrl}
-              alt={data.title}
+              alt={safeTitle}
               className="h-full w-full object-cover"
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full min-h-[120px] items-center justify-center text-zinc-400">
-              <Cookie className="h-10 w-10" />
-            </div>
-          )}
+            <div className="flex h-full min-h-[120px] items-center justify-center gap-2 text-zinc-400">
+  <span className="text-3xl">🍪</span>
+  <span className="text-xs">No photo</span>
+</div>
+           )}
         </div>
-
+        
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <h4 ref={scrollRef} className="text-lg font-semibold text-zinc-900">
-                {data.title}
-                {data.pronounced && (
+                {safeTitle}
+                {(data as any)?.pronounced && (
                   <span className="ml-2 text-xs font-normal text-zinc-500">
-                    ({data.pronounced})
+                    ({(data as any)?.pronounced})
                   </span>
                 )}
               </h4>
@@ -1184,46 +1210,52 @@ const storyText = data.story?.trim?.();
                   className="rounded-full p-1 hover:bg-amber-50"
                   aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <Heart className={cx("h-4 w-4", isFavorite ? "fill-red-500 text-red-500" : "text-zinc-400")} />
+                  <Heart
+                    className={cx(
+                      "h-4 w-4",
+                      isFavorite ? "fill-red-500 text-red-500" : "text-zinc-400"
+                    )}
+                  />
                 </button>
               )}
             </div>
 
             <div className="flex items-center gap-1">
-  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-    {data.country}
-  </span>
+              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+                {(data as any)?.country}
+              </span>
 
-  {onClose && (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClose();
-      }}
-      aria-label="Close recipe"
-      title="Close"
-      className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-    >
-      ×
-    </button>
-  )}
-</div>
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  aria-label="Close recipe"
+                  title="Close"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
 
-          {data.alternateTitle && (
-            <p className="text-xs text-zinc-600">Also known as: {data.alternateTitle}</p>
+          {(data as any)?.alternateTitle && (
+            <p className="text-xs text-zinc-600">Also known as: {(data as any)?.alternateTitle}</p>
           )}
-          {data.description && <p className="text-sm text-zinc-700">{data.description}</p>}
-          {data.story && (
-  <p className="text-sm italic text-zinc-600 whitespace-pre-line">
-    “{data.story}”
-  </p>
-)}
+          {(data as any)?.description && <p className="text-sm text-zinc-700">{(data as any)?.description}</p>}
 
-          {(data.ingredients && data.ingredients.length > 0) || (data.steps && data.steps.length > 0) ? (
+          {(data as any)?.story && (
+            <p className="text-sm italic text-zinc-600 whitespace-pre-line">
+              “{(data as any)?.story}”
+            </p>
+          )}
+
+          {(((data as any)?.ingredients?.length ?? 0) > 0) || (((data as any)?.steps?.length ?? 0) > 0) ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {data.ingredients && data.ingredients.length > 0 ? (
+              {((data as any)?.ingredients?.length ?? 0) > 0 ? (
                 <div>
                   <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Ingredients
@@ -1236,13 +1268,13 @@ const storyText = data.story?.trim?.();
                 </div>
               ) : null}
 
-              {data.steps && data.steps.length > 0 ? (
+              {((data as any)?.steps?.length ?? 0) > 0 ? (
                 <div>
                   <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Steps
                   </h5>
                   <ol className="list-decimal pl-5 text-sm text-zinc-700">
-                    {data.steps.map((it, i) => (
+                    {((data as any)?.steps ?? []).map((it: any, i: number) => (
                       <li key={i}>{it}</li>
                     ))}
                   </ol>
@@ -1255,34 +1287,38 @@ const storyText = data.story?.trim?.();
             </div>
           )}
 
-{storyText ? (
-  <Card
-    className="mt-3 mx-auto w-full sm:max-w-x2 border border-zinc-200 bg-white/70 p-3"
-    onClick={(e) => e.stopPropagation()}
-  >
-    <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-      Cookie Story
-    </h5>
-    <p className="text-sm text-zinc-700 whitespace-pre-line">
-      {storyText}
-    </p>
-  </Card>
-) : null}
+          {storyText ? (
+            <Card
+              // ✅ FIX 2: Tailwind typo (2x1 -> 2xl)
+              className="mt-3 mx-auto w-full sm:max-w-2xl border border-zinc-200 bg-white/70 p-3"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                Cookie Story
+              </h5>
+              <p className="text-sm text-zinc-700 whitespace-pre-line">{storyText}</p>
+            </Card>
+          ) : null}
 
-          {(data.culturalNote || data.birthdayTip || data.personalNote || data.passportStamp) && (
+          {((data as any)?.culturalNote ||
+            (data as any)?.birthdayTip ||
+            (data as any)?.personalNote ||
+            (data as any)?.passportStamp) && (
             <Card className="mt-3 border-dashed border-amber-200 bg-amber-50/40 p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {data.culturalNote && (
-                  <p className="sm:col-span-2 text-xs italic text-zinc-700">“{data.culturalNote}”</p>
-                )}
-                {data.birthdayTip && (
-                  <p className="text-xs text-zinc-700">
-                    <strong>Birthday Tip:</strong> {data.birthdayTip}
+                {(data as any)?.culturalNote && (
+                  <p className="sm:col-span-2 text-xs italic text-zinc-700">
+                    “{(data as any)?.culturalNote}”
                   </p>
                 )}
-                {data.personalNote && (
+                {(data as any)?.birthdayTip && (
+                  <p className="text-xs text-zinc-700">
+                    <strong>Birthday Tip:</strong> {(data as any)?.birthdayTip}
+                  </p>
+                )}
+                {(data as any)?.personalNote && (
                   <p className="text-xs italic text-zinc-700">
-                    <strong>Personal Note:</strong> {data.personalNote}
+                    <strong>Personal Note:</strong> {(data as any)?.personalNote}
                   </p>
                 )}
               </div>
@@ -1307,6 +1343,8 @@ export default function CookieAccordTwoPane() {
 
   const [communityRows, setCommunityRows] = useState<CommunityCookieRow[]>([]);
   const [communityLoading, setCommunityLoading] = useState(false);
+// ✅ NEW: local upload stored as data URL
+const [photoData, setPhotoData] = useState<string>("");
 
   async function fetchCommunityCookies() {
   setCommunityLoading(true);
@@ -1315,7 +1353,7 @@ export default function CookieAccordTwoPane() {
     .schema("public")
     .from("cookies_community")
     .select(
-      "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,flagged,hidden,flagged_reason,created_at,updated_at"
+      "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,photo_path,owner_id,flagged,hidden,flagged_reason,created_at,updated_at"
     )
     .eq("hidden", false)
     .order("created_at", { ascending: false });
@@ -1344,10 +1382,25 @@ export default function CookieAccordTwoPane() {
 
     const id = window.setInterval(() => {
       fetchCommunityCookies();
-    }, 15000);
+    }, 60000); // ✅ was 15000
 
     return () => window.clearInterval(id);
   }, []);
+  
+useEffect(() => {
+  const onFocus = () => fetchCommunityCookies();
+  const onVis = () => {
+    if (document.visibilityState === "visible") fetchCommunityCookies();
+  };
+
+  window.addEventListener("focus", onFocus);
+  document.addEventListener("visibilitychange", onVis);
+
+  return () => {
+    window.removeEventListener("focus", onFocus);
+    document.removeEventListener("visibilitychange", onVis);
+  };
+}, []);
 
   const [currentUid, setCurrentUid] = useState<string | null>(null);
 
@@ -1360,27 +1413,31 @@ export default function CookieAccordTwoPane() {
   }, []);
 
   const communityCookies = useMemo<CookieRow[]>(() => {
-    return communityRows.map((r) => ({
-      id: r.id,
-      country: r.country,
-      title: r.title,
-      // normalize DB strings -> arrays for UI
-      ingredients: String(r.ingredients ?? "")
-        .split(/\r?\n|,\s*/g)
-        .map((s) => s.trim())
-        .filter(Boolean),
-      steps: String(r.instructions ?? "")
-        .split(/\r?\n/g)
-        .map((s) => s.trim())
-        .filter(Boolean),
-      story: r.notes ?? "",
-      sourceUrl: (r.source_url ?? "") as any,
-      submitterName: (r.submitter_name ?? "") as any,
-      photo_url: (r.photo_url ?? null) as any, // keep snake_case too
-      photoUrl: (r.photo_url ?? null) as any,  // and camelCase for UI
-      owner_id: (r.owner_id ?? null) as any,
-    })) as any;
-  }, [communityRows]);
+  return communityRows.map((r) => ({
+    id: r.id,
+    country: r.country,
+    title: r.title,
+    ingredients: String(r.ingredients ?? "")
+      .split(/\r?\n|,\s*/g)
+      .map((s) => s.trim())
+      .filter(Boolean),
+    steps: String(r.instructions ?? "")
+      .split(/\r?\n/g)
+      .map((s) => s.trim())
+      .filter(Boolean),
+    story: r.notes ?? "",
+    sourceUrl: (r.source_url ?? "") as any,
+    submitterName: (r.submitter_name ?? "") as any,
+
+    photo_url: (r as any).photo_url ?? null,
+    photoUrl: (r as any).photo_url ?? null,
+
+    photo_path: (r as any).photo_path ?? null,   // ✅ ADD
+    photoPath: (r as any).photo_path ?? null,    // ✅ ADD (so your resolver can find it)
+
+    owner_id: (r.owner_id ?? null) as any,
+  })) as any;
+}, [communityRows]);
 
   const communityByCountry = useMemo(() => {
     const m = new Map<string, CookieRow[]>();
@@ -1514,21 +1571,6 @@ async function ensureAnonSession(): Promise<string> {
   return uid2;
 }
 
-// When someone submits: save to Supabase (shared) + update state
-async function handleSubmittedCookie(row: CookieRow) {
-  const uploadToCookiePhotos = async (fileOrBlob: Blob, ownerId: string) => {
-    const contentType = (fileOrBlob as any)?.type || "image/jpeg";
-    // ... rest of upload helper ...
-  };
-
-  try {
-    const ownerId = await ensureAnonSession();
-    // ... rest of submit logic ...
-  } catch (err: any) {
-    // ... error handling ...
-  }
-}
-
  // When someone submits: save to Supabase (shared) + update state
 async function handleSubmittedCookie(row: CookieRow) {
   const uploadToCookiePhotos = async (fileOrBlob: Blob, ownerId: string) => {
@@ -1547,12 +1589,12 @@ async function handleSubmittedCookie(row: CookieRow) {
     const path = `${ownerId}/${fileName}`;
 
     const { error: uploadErr } = await supabase.storage
-      .from("photos")
-      .upload(path, fileOrBlob, {
-        upsert: false,
-        contentType,
-        cacheControl: "3600",
-      });
+  .from("photos") // ✅ CHANGE THIS
+  .upload(path, fileOrBlob, {
+    upsert: false,
+    contentType,
+    cacheControl: "3600",
+  });
 
     if (uploadErr) throw uploadErr;
     return path;
@@ -1575,59 +1617,60 @@ async function handleSubmittedCookie(row: CookieRow) {
     } as any;
 
     // Photo -> Storage path (or keep https URL)
-    let storedPhotoValue: string | null = null;
+    // Photo -> either store https URL in photo_url OR store Storage path in photo_path
+let storedPhotoValue: string | null = null;
 
-    const maybeFile: File | undefined = (row as any).photoFile;
-    const rawPhotoUrl =
-      normalized.photoUrl?.trim?.() ? normalized.photoUrl.trim() : "";
+const rawPhotoUrl =
+  normalized.photoUrl?.trim?.() ? normalized.photoUrl.trim() : "";
 
-    if (maybeFile) {
-      storedPhotoValue = await uploadToCookiePhotos(maybeFile, ownerId);
-    } else if (rawPhotoUrl) {
-      if (rawPhotoUrl.startsWith("data:image/")) {
-        const res = await fetch(rawPhotoUrl);
-        const blob = await res.blob();
-        storedPhotoValue = await uploadToCookiePhotos(blob, ownerId);
-      } else if (rawPhotoUrl.startsWith("blob:")) {
-        const res = await fetch(rawPhotoUrl);
-        const blob = await res.blob();
-        storedPhotoValue = await uploadToCookiePhotos(blob, ownerId);
-      } else if (/^https?:\/\//i.test(rawPhotoUrl)) {
-        storedPhotoValue = rawPhotoUrl;
-      }
-    }
+if (rawPhotoUrl) {
+  if (rawPhotoUrl.startsWith("data:image/") || rawPhotoUrl.startsWith("blob:")) {
+    const res = await fetch(rawPhotoUrl);
+    const blob = await res.blob();
+    storedPhotoValue = await uploadToCookiePhotos(blob, ownerId); // returns path
+  } else if (/^https?:\/\//i.test(rawPhotoUrl)) {
+    storedPhotoValue = rawPhotoUrl; // keep as URL
+  }
+}
 
-    const photo_url =
-      storedPhotoValue && storedPhotoValue.trim()
-        ? storedPhotoValue.trim()
-        : null;
+let photo_url: string | null = null;
+let photo_path: string | null = null;
 
-    const payload = {
-      title: String((normalized as any).title || "Untitled Cookie").trim(),
-      country: String(normalized.country || "").trim(),
-      ingredients: String(
-        Array.isArray(normalized.ingredients)
-          ? normalized.ingredients.join("\n")
-          : (normalized as any).ingredients ?? ""
-      ).trim(),
-      instructions: String(
-        Array.isArray((normalized as any).steps)
-          ? (normalized as any).steps.join("\n")
-          : (normalized as any).steps ?? ""
-      ).trim(),
-      notes: (normalized as any).story?.trim?.()
-        ? (normalized as any).story.trim()
-        : null,
-      source_url: (normalized as any).sourceUrl?.trim?.()
-        ? (normalized as any).sourceUrl.trim()
-        : null,
-      submitter_name: (normalized as any).submitterName?.trim?.()
-        ? (normalized as any).submitterName.trim()
-        : null,
-      owner_id: ownerId,
-      photo_url,
-      hidden: false,
-    };
+if (storedPhotoValue) {
+  if (/^https?:\/\//i.test(storedPhotoValue)) photo_url = storedPhotoValue;
+  else photo_path = storedPhotoValue;
+}
+
+  const payload = {
+  title: String((normalized as any).title || "Untitled Cookie").trim(),
+  country: String(normalized.country || "").trim(),
+  ingredients: String(
+    Array.isArray(normalized.ingredients)
+      ? normalized.ingredients.join("\n")
+      : (normalized as any).ingredients ?? ""
+  ).trim(),
+  instructions: String(
+    Array.isArray((normalized as any).steps)
+      ? (normalized as any).steps.join("\n")
+      : (normalized as any).steps ?? ""
+  ).trim(),
+  notes: (normalized as any).story?.trim?.()
+    ? (normalized as any).story.trim()
+    : null,
+  source_url: (normalized as any).sourceUrl?.trim?.()
+    ? (normalized as any).sourceUrl.trim()
+    : null,
+  submitter_name: (normalized as any).submitterName?.trim?.()
+    ? (normalized as any).submitterName.trim()
+    : null,
+
+  owner_id: ownerId,
+
+  photo_url,   // ✅ uses https when present
+  photo_path,  // ✅ uses storage path when uploaded
+
+  hidden: false,
+};
 
     if (payload.title.length < 2) return alert("Please add a cookie title.");
     if (payload.country.length < 2) return alert("Please choose a country.");
@@ -1641,7 +1684,7 @@ async function handleSubmittedCookie(row: CookieRow) {
       .from("cookies_community")
       .insert(payload)
       .select(
-        "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,owner_id,created_at,updated_at"
+        "id,title,country,ingredients,instructions,notes,source_url,submitter_name,photo_url,photo_path,owner_id,created_at,updated_at"
       )
       .single();
 
@@ -1651,23 +1694,31 @@ async function handleSubmittedCookie(row: CookieRow) {
     setCommunityRows((prev) => [inserted as any, ...prev]);
 
     const insertedForUI: CookieRow = {
-      id: inserted.id,
-      title: inserted.title,
-      country: inserted.country,
-      ingredients: String((inserted as any).ingredients ?? "")
-        .split(/\r?\n|,\s*/g)
-        .map((s) => s.trim())
-        .filter(Boolean),
-      steps: String((inserted as any).instructions ?? "")
-        .split(/\r?\n/g)
-        .map((s) => s.trim())
-        .filter(Boolean),
-      story: (inserted as any).notes ?? "",
-      sourceUrl: (inserted as any).source_url ?? "",
-      submitterName: (inserted as any).submitter_name ?? "",
-      photoUrl: (inserted as any).photo_url ?? null,
-      photo_url: (inserted as any).photo_url ?? null,
-    } as any;
+  id: inserted.id,
+  title: inserted.title,
+  country: inserted.country,
+  ingredients: String((inserted as any).ingredients ?? "")
+    .split(/\r?\n|,\s*/g)
+    .map((s) => s.trim())
+    .filter(Boolean),
+  steps: String((inserted as any).instructions ?? "")
+    .split(/\r?\n/g)
+    .map((s) => s.trim())
+    .filter(Boolean),
+  story: (inserted as any).notes ?? "",
+  sourceUrl: (inserted as any).source_url ?? "",
+  submitterName: (inserted as any).submitter_name ?? "",
+
+  // keep both in case it's a real URL
+  photoUrl: (inserted as any).photo_url ?? null,
+  photo_url: (inserted as any).photo_url ?? null,
+
+  // ✅ THIS is what you need for Storage uploads
+  photoPath: (inserted as any).photo_path ?? null,
+  photo_path: (inserted as any).photo_path ?? null,
+
+  owner_id: (inserted as any).owner_id ?? null,
+} as any;
 
     setSubmitted(insertedForUI);
     setSelectedCookie(insertedForUI);
@@ -1695,7 +1746,6 @@ async function handleSubmittedCookie(row: CookieRow) {
     alert(`Submit failed: ${msg}`);
   }
 }
-
 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -1727,11 +1777,11 @@ async function handleSubmittedCookie(row: CookieRow) {
   }
 
   function toggleFavorite(row: CookieRow) {
-    if (!row.id) return;
-    setFavorites((prev) =>
-      prev.includes(row.id) ? prev.filter((x) => close !== row.id) : [...prev, row.id]
-    );
-  }
+  if (!row.id) return;
+  setFavorites((prev) =>
+    prev.includes(row.id) ? prev.filter((x) => x !== row.id) : [...prev, row.id]
+  );
+}
 
    // ---------- ONE unified search query (curated + community) ----------
 
@@ -1850,18 +1900,7 @@ const matchesQuery = (c: CookieRow, qRaw: string) => {
         {/* Two-column body */}
 <main className="block">
 
-  {/* 🔍 TEMP TEST — remove after */}
-  {showCommunity && (
-    <div
-  className="mb-2 rounded border border-zinc-200 p-2 text-xs"
-  onClickCapture={() => console.log("✅ main clicked (capture)")}
->
-  Click test area (temporary)
-</div>
-
-  )}
-
-  {/* Left Column */}
+   {/* Left Column */}
   <section>
     <motion.div {...fadeIn}>
       <Card className="p-4">

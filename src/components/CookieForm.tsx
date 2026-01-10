@@ -31,7 +31,8 @@ export default function CookieForm() {
 
   const limits = { title: 80, story: 600, steps: 2000 };
   const titleCount = `${form.title.length}/${limits`;
-  const storyCount = `${form.story.length}/${limits.story}`;
+  const storyCount = "";
+
   const stepsCount = `${form.steps.length}/${limits.steps}`;
 
   // Normalize textarea lines into clean arrays
@@ -43,15 +44,21 @@ export default function CookieForm() {
   }
 
   function validate(values: typeof form) {
-    const e: Record<string, string> = {};
-    if (!values.title.trim()) e.title = "Please add a recipe title.";
-    if (!values.ingredients.trim()) e.ingredients = "Add at least one ingredient.";
-    if (!values.steps.trim()) e.steps = "Tell us how to make it.";
-    if (!values.consent) e.consent = "Please agree to share kindly & originally.";
-    if (values.title.length > limits.title) e.title = `Keep title under ${limits characters.`;
-    if (values.story.length > limits.story) e.story = `Keep story under ${limits.story} characters.`;
-    return e;
-  }
+  const e: Record<string, string> = {};
+
+  if (!values.title.trim()) e.title = "Please add a recipe title.";
+  if (!values.ingredients.trim()) e.ingredients = "Add at least one ingredient.";
+  if (!values.steps.trim()) e.steps = "Tell us how to make it.";
+  if (!values.consent) e.consent = "Please agree to share kindly & originally.";
+
+  if (values.title.length > limits.title)
+    e.title = `Keep title under ${limits.title} characters.`;
+
+  if (values.story.length > limits.story)
+    e.story = `Keep story under ${limits.story} characters.`;
+
+  return e;
+}
 
   function onChange(field: keyof typeof form) {
     return (ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -331,7 +338,10 @@ export default function CookieForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-base font-semibold">{submittedData</p>
+              <p className="text-base font-semibold">
+  {submittedData?.title ?? "Submitted"}
+</p>
+
               <p className="text-zinc-700">
                 {submittedData.country || "—"} {submittedData.theme ? `• ${submittedData.theme}` : ""}
               </p>
