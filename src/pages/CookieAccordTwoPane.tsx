@@ -83,7 +83,6 @@ export type CookieRow = {
   sharedWith?: string;
   memory?: string;
 
-  // (sometimes referenced in search)
   flagFunFact?: string;
 };
 
@@ -204,7 +203,7 @@ function normalize(raw: any[]): CookieRow[] {
     const birthdayTipVal = pick(r, ["birthdayTip", "BirthdayTip", "birthday_tip"], "");
     const personalNoteVal = pick(r, ["personalNote", "PersonalNote", "personal_note"], "");
     const passportStampVal = pick(r, ["passportStamp", "PassportStamp", "passport_stamp"], "");
-
+    const flagFunFactVal = pick(r, ["flagFunFact", "funFact", "flag_fun_fact"], ""); 
     return {
       id: r.id || `row-${i}`,
       country: String(countryVal).trim() || "Unknown",
@@ -221,7 +220,7 @@ function normalize(raw: any[]): CookieRow[] {
       birthdayTip: String(birthdayTipVal || ""),
       personalNote: String(personalNoteVal || ""),
       passportStamp: String(passportStampVal || ""),
-      flagFunFact: String(r.flagFunFact || r.funFact || ""),
+      flagFunFact: String(flagFunFactVal || ""),
       region: String(r.region || ""),
       language: String(r.language || ""),
     } as CookieRow;
@@ -799,7 +798,7 @@ const getPhotoUrl = (ck: CookieRow) =>
                     )}
 
                    {/* Shared by the Community */}
-<div className="space-y-2">
+<div className="space-y-3 text-base leading-relaxed">
   <div className="flex items-center gap-2">
     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
       Shared by the Community
@@ -1171,160 +1170,182 @@ useEffect(() => {
       }}
     >
       <div className={cx("h-1 w-full", accent === "amber" ? "bg-amber-300" : "bg-emerald-300")} />
-      <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-[160px,1fr]">
-        <div className="h-28 sm:h-32 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
-          {resolvedUrl ? (
-            <img
-              src={resolvedUrl}
-              alt={safeTitle}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full min-h-[120px] items-center justify-center gap-2 text-zinc-400">
-  <span className="text-3xl">🍪</span>
-  <span className="text-xs">No photo</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+
+        <div className="space-y-3">
+  <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 aspect-[16/9]">
+    {resolvedUrl ? (
+      <img
+        src={resolvedUrl}
+        alt={safeTitle}
+        className="h-full w-full object-cover"
+        loading="lazy"
+      />
+    ) : (
+      <div className="flex h-full min-h-[120px] items-center justify-center gap-2 text-zinc-400">
+        <span className="text-3xl">🍪</span>
+        <span className="text-xs">No photo</span>
+      </div>
+    )}
+  </div>
+
+  {/* ✅ Recipe under photo (LEFT column) */}
+  {(((data as any)?.ingredients?.length ?? 0) > 0) || (((data as any)?.steps?.length ?? 0) > 0) ? (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {((data as any)?.ingredients?.length ?? 0) > 0 ? (
+        <div>
+          <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            Ingredients
+          </h5>
+          <ul className="list-disc pl-5 text-[15px] text-zinc-700">
+            {ingredientsList.map((it, i) => (
+              <li key={i}>{it}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {((data as any)?.steps?.length ?? 0) > 0 ? (
+        <div>
+          <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            Steps
+          </h5>
+          <ol className="list-decimal pl-5 text-sm text-zinc-700">
+            {((data as any)?.steps ?? []).map((it: any, i: number) => (
+              <li key={i}>{it}</li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+    </div>
+  ) : (
+    <div className="rounded-xl bg-amber-50/60 p-3 text-xs text-amber-800">
+      No steps yet for this recipe. Add your tips on the right and we’ll include them!
+    </div>
+  )}
 </div>
-           )}
-        </div>
         
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <h4 ref={scrollRef} className="text-lg font-semibold text-zinc-900">
-                {safeTitle}
-                {(data as any)?.pronounced && (
-                  <span className="ml-2 text-xs font-normal text-zinc-500">
-                    ({(data as any)?.pronounced})
-                  </span>
-                )}
-              </h4>
+        <div className="space-y-3 text-[15.5px] leading-relaxed">
+  <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center gap-2">
+      <h4 ref={scrollRef} className="text-xl font-semibold text-zinc-900">
+        {safeTitle}
+        {(data as any)?.pronounced && (
+          <span className="ml-2 text-sm font-normal text-zinc-500">
+            ({(data as any)?.pronounced})
+          </span>
+        )}
+      </h4>
 
-              {onToggleFavorite && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite(data);
-                  }}
-                  className="rounded-full p-1 hover:bg-amber-50"
-                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                >
-                  <Heart
-                    className={cx(
-                      "h-4 w-4",
-                      isFavorite ? "fill-red-500 text-red-500" : "text-zinc-400"
-                    )}
-                  />
-                </button>
-              )}
-            </div>
+      {onToggleFavorite && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(data);
+          }}
+          className="rounded-full p-1 hover:bg-amber-50"
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Heart
+            className={cx(
+              "h-4 w-4",
+              isFavorite ? "fill-red-500 text-red-500" : "text-zinc-400"
+            )}
+          />
+        </button>
+      )}
+    </div>
 
-            <div className="flex items-center gap-1">
-              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-                {(data as any)?.country}
-              </span>
+    <div className="flex items-center gap-1">
+      <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-700">
+        {(data as any)?.country}
+      </span>
 
-              {onClose && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClose();
-                  }}
-                  aria-label="Close recipe"
-                  title="Close"
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
+      {onClose && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          aria-label="Close recipe"
+          title="Close"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  </div>
 
-          {(data as any)?.alternateTitle && (
-            <p className="text-xs text-zinc-600">Also known as: {(data as any)?.alternateTitle}</p>
-          )}
-          {(data as any)?.description && <p className="text-sm text-zinc-700">{(data as any)?.description}</p>}
+  {(data as any)?.alternateTitle && (
+    <p className="text-sm text-zinc-600">
+      Also known as: {(data as any)?.alternateTitle}
+    </p>
+  )}
 
-          {(data as any)?.story && (
-            <p className="text-sm italic text-zinc-600 whitespace-pre-line">
-              “{(data as any)?.story}”
-            </p>
-          )}
+  {(data as any)?.description && (
+    <p className="text-[15.5px] text-zinc-700">{(data as any)?.description}</p>
+  )}
 
-          {(((data as any)?.ingredients?.length ?? 0) > 0) || (((data as any)?.steps?.length ?? 0) > 0) ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {((data as any)?.ingredients?.length ?? 0) > 0 ? (
-                <div>
-                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Ingredients
-                  </h5>
-                  <ul className="list-disc pl-5 text-sm text-zinc-700">
-                    {ingredientsList.map((it, i) => (
-                      <li key={i}>{it}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+  {(data as any)?.story && (
+    <p className="text-[15px] italic text-zinc-600 whitespace-pre-line">
+      “{(data as any)?.story}”
+    </p>
+  )}
 
-              {((data as any)?.steps?.length ?? 0) > 0 ? (
-                <div>
-                  <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Steps
-                  </h5>
-                  <ol className="list-decimal pl-5 text-sm text-zinc-700">
-                    {((data as any)?.steps ?? []).map((it: any, i: number) => (
-                      <li key={i}>{it}</li>
-                    ))}
-                  </ol>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-xl bg-amber-50/60 p-3 text-xs text-amber-800">
-              No steps yet for this recipe. Add your tips on the right and we’ll include them!
-            </div>
-          )}
+  {storyText ? (
+    <Card
+      className="mt-3 mx-auto w-full sm:max-w-2xl border border-zinc-200 bg-white/70 p-3"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        Cookie Story
+      </h5>
+      <p className="text-[15.5px] text-zinc-700 whitespace-pre-line">{storyText}</p>
+    </Card>
+  ) : null}
 
-          {storyText ? (
-            <Card
-              // ✅ FIX 2: Tailwind typo (2x1 -> 2xl)
-              className="mt-3 mx-auto w-full sm:max-w-2xl border border-zinc-200 bg-white/70 p-3"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h5 className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                Cookie Story
-              </h5>
-              <p className="text-sm text-zinc-700 whitespace-pre-line">{storyText}</p>
-            </Card>
-          ) : null}
+  {((data as any)?.culturalNote ||
+    (data as any)?.birthdayTip ||
+    (data as any)?.personalNote ||
+    (data as any)?.passportStamp ||
+    (data as any)?.flagFunFact) && (
+    <Card className="mt-3 border-dashed border-amber-200 bg-amber-50/40 p-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {(data as any)?.culturalNote && (
+          <p className="sm:col-span-2 text-sm italic text-zinc-700">
+            “{(data as any)?.culturalNote}”
+          </p>
+        )}
 
-          {((data as any)?.culturalNote ||
-            (data as any)?.birthdayTip ||
-            (data as any)?.personalNote ||
-            (data as any)?.passportStamp) && (
-            <Card className="mt-3 border-dashed border-amber-200 bg-amber-50/40 p-3">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(data as any)?.culturalNote && (
-                  <p className="sm:col-span-2 text-xs italic text-zinc-700">
-                    “{(data as any)?.culturalNote}”
-                  </p>
-                )}
-                {(data as any)?.birthdayTip && (
-                  <p className="text-xs text-zinc-700">
-                    <strong>Birthday Tip:</strong> {(data as any)?.birthdayTip}
-                  </p>
-                )}
-                {(data as any)?.personalNote && (
-                  <p className="text-xs italic text-zinc-700">
-                    <strong>Personal Note:</strong> {(data as any)?.personalNote}
-                  </p>
-                )}
-              </div>
-            </Card>
-          )}
-        </div>
+        {(data as any)?.birthdayTip && (
+          <p className="text-sm text-zinc-700">
+            <span className="font-semibold text-zinc-700">Birthday Tip:</span>{" "}
+            {(data as any)?.birthdayTip}
+          </p>
+        )}
+        
+{(data as any)?.flagFunFact && (
+  <p className="text-sm text-zinc-700">
+    <span className="font-semibold text-zinc-700">Flag Fun Fact:</span>{" "}
+    {(data as any)?.flagFunFact}
+  </p>
+)}
+
+       {(data as any)?.personalNote && (
+  <p className="sm:col-span-2 text-sm italic text-zinc-700">
+    <span className="font-semibold not-italic text-zinc-700">
+      Personal Note:
+    </span>{" "}
+    {(data as any)?.personalNote}
+  </p>
+)}
+      </div>
+    </Card>
+  )}
+</div>
       </div>
     </Card>
   );
@@ -1337,6 +1358,8 @@ export default function CookieAccordTwoPane() {
   const [includeCommunity, setIncludeCommunity] = useState(true);
   const [showCommunity, setShowCommunity] = useState(false);
   const communityRef = useRef<HTMLDivElement | null>(null);
+  const countryListRef = useRef<HTMLDivElement | null>(null);
+
   const [countryView, setCountryView] = useState<"countries" | "community">(
     "countries"
   );
