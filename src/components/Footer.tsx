@@ -1,51 +1,61 @@
 // src/components/Footer.tsx
 import React from "react";
 import ShareCookieButton from "./ShareCookieButton";
+import NewsletterSignup from "./NewsletterSignup";
+
 
 export default function Footer() {
   return (
-    <footer className="mt-12 border-t bg-stone-50/70 py-4 text-xs text-stone-600">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 md:flex-row md:items-center md:justify-between">
-        {/* Left */}
-        <div className="text-center leading-snug md:text-left">
-          <p className="mb-1">A cookie is tiny. The gesture is enormous.</p>
-          <p className="text-stone-700">
-            Made with sweetness &amp; peace • Cookie Accord © {new Date().getFullYear()}
-          </p>
-          <p className="mt-0.5 text-stone-500">me n Sol – 2025</p>
+    <footer className="mt-12 border-t bg-stone-50/70 py-6 text-xs text-stone-600">
+      <div className="mx-auto max-w-5xl px-4">
+        {/* Top row: existing footer content */}
+        <div className="flex flex-col items-center gap-2 md:flex-row md:items-center md:justify-between">
+          {/* Left */}
+          <div className="text-center leading-snug md:text-left">
+            <p className="mb-1">A cookie is tiny. The gesture is enormous.</p>
+            <p className="text-stone-700">
+              Made with sweetness &amp; peace • Cookie Accord © {new Date().getFullYear()}
+            </p>
+            <p className="mt-0.5 text-stone-500">me n Sol – 2025</p>
+          </div>
+
+          {/* Right */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <a
+              href="https://instagram.com/cookieaccord"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+            >
+              Instagram
+            </a>
+
+            <a
+              href="https://facebook.com/cookieaccord"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+            >
+              Facebook
+            </a>
+
+            <a
+              href="https://twitter.com/cookieaccord"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
+            >
+              X (Twitter)
+            </a>
+
+            <ShareCookieButton />
+          </div>
         </div>
 
-        {/* Right */}
-        <div className="flex flex-wrap items-center justify-center gap-4">
-  <a
-    href="https://instagram.com/cookieaccord"
-    target="_blank"
-    rel="noreferrer"
-    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
-  >
-    Instagram
-  </a>
-
-  <a
-    href="https://facebook.com/cookieaccord"
-    target="_blank"
-    rel="noreferrer"
-    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
-  >
-    Facebook
-  </a>
-
-  <a
-    href="https://twitter.com/cookieaccord"
-    target="_blank"
-    rel="noreferrer"
-    className="text-sm text-amber-600 transition hover:text-amber-800 hover:underline"
-  >
-    X (Twitter)
-  </a>
-
-  <ShareCookieButton />
-</div>
+        {/* Newsletter block */}
+        <div className="mt-6 border-t border-stone-200 pt-6">
+         <NewsletterSignup />
+        </div>
       </div>
     </footer>
   );

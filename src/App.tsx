@@ -9,6 +9,7 @@ import Contact from "./pages/Contact";
 import Purchase from "./pages/Purchase";
 import MeNSol from "./pages/MeNSol";
 import { useVisitorCounter } from "./lib/useVisitorCounter";
+import Unsubscribe from "./pages/Unsubscribe";
 
 function VisitorCounter() {
   useVisitorCounter();
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/_me-n-sol" element={<MeNSol />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
         </Route>
       </Routes>
     </BrowserRouter>
