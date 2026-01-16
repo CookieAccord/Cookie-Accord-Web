@@ -91,6 +91,17 @@ export default function RootLayout({ children }: PropsWithChildren) {
                 </span>
               </span>
             </NavLink>
+
+            <NavLink
+  to="/crumbs"
+  className={({ isActive }) =>
+    "relative inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm transition " +
+    (isActive ? "bg-amber-100 text-amber-900" : "text-stone-700 hover:bg-stone-100")
+  }
+>
+  Cookie Crumbs
+</NavLink>
+
            {/*<NavLink
               to="/me-n-sol"
               className={({ isActive }) =>
