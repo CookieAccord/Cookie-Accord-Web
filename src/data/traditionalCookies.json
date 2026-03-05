@@ -295,7 +295,15 @@
     "language": "",
     "flagFunFact": "Armenia’s flag has red for the blood of freedom fighters, blue for the peaceful sky, and orange for the fertile land and hardworking spirit of its people.",
     "culturalNote": "Gata is Armenia’s beloved celebration pastry—part cookie, part sweet bread, part sacred tradition.\nEach region has its own style, but all share a tender, buttery dough filled with khoriz (a sweet, crumbly filling of flour, butter, and sugar, sometimes with nuts or spices).\nGata is often decorated with beautiful patterns or cuts, shared at weddings, birthdays, religious holidays, and family feasts.\nIt’s not just a dessert. It’s a blessing.",
-    "ingredients": [],
+    "ingredients": [
+    "2 cups flour",
+    "1/2 cup sugar",
+    "1/2 cup butter",
+    "1 egg",
+    "1/2 cup yogurt or sour cream",
+    "1 tsp baking powder",
+    "1 tsp vanilla",
+    "Pinch salt"],
     "instructions": [
       "Preheat oven to 175°C (350°F). Line baking tray with parchment.",
       "For filling, mix flour, sugar, butter, and cinnamon/nuts (if using) into a crumbly blend.",
@@ -447,7 +455,15 @@
     "language": "",
     "flagFunFact": "Azerbaijan’s flag features three stripes—blue for Turkic heritage, red for progress, green for Islam—with a white crescent and an eight-pointed star representing the nation’s ideals.\n-\tIngredients:",
     "culturalNote": "Shekerbura is Azerbaijan’s iconic celebration pastry—beautifully molded crescent-shaped treats filled with a sweet, nutty mixture.\nTraditionally made for Novruz (Persian New Year), Shekerbura symbolizes new beginnings, friendship, and hospitality.\nWomen often gather to make them together, pressing intricate designs into the dough using special tweezers called maggash.",
-    "ingredients": [],
+    "ingredients": [
+     "2 cups flour",
+     "1/2 cup butter",
+     "1/2 cup milk",
+     "1 egg",
+     "1 tsp yeast",
+     "3/4 cup ground almonds or walnuts",
+     "1/3 cup sugar",
+     "1/2 tsp cardamom"],
     "instructions": [
       "Make the dough: Mix flour, salt, and sugar. Add butter, yogurt/milk, and egg. Knead into a soft, pliable dough. Cover and let rest 30 minutes.",
       "For filling: Mix ground nuts, sugar, cardamom, and rose/orange blossom water if using.",
@@ -522,7 +538,16 @@
     "language": "",
     "flagFunFact": "Bahrain’s flag features white and red separated by a five-pointed zig-zag. The red symbolizes tradition and courage, while the white represents peace. The five points stand for the five pillars of Islam.",
     "culturalNote": "In Bahrain and across the Arabian Gulf, dates are the heart of hospitality and celebration.\nDate Mamoul is a traditional filled cookie popular throughout the Middle East. Made with semolina or flour dough and a sweet, spiced date filling, these cookies are especially popular at Eid, weddings, and festive gatherings.\nIn Bahrain, sharing dates—and cookies made with them—is a symbol of warmth, generosity, and welcome.",
-    "ingredients": [],
+    "ingredients": [
+      "1 cup semolina",
+      "1 cup flour",
+      "1/2 cup butter or ghee",
+      "1/4 cup milk",
+      "1 tsp baking powder",
+      "1 cup date paste",
+      "1/2 tsp cardamom",
+      "1 tsp rose water"
+    ],
     "instructions": [
       "For filling, cook dates with butter in a small pan over low heat until soft. Add spices and mash to a smooth paste. Cool.",
       "For dough, mix flour, semolina, sugar, baking powder, and salt.",
@@ -715,7 +740,16 @@
     "language": "",
     "flagFunFact": "Belize’s flag has a royal blue field with red stripes and a detailed coat of arms featuring a mahogany tree and two woodcutters, symbolizing the country’s colonial history and multicultural heritage.",
     "culturalNote": "Belizean Coconut Tarts are a staple at birthdays, holidays, and local bake shops.\nThey’re tiny, bright, and bursting with sweet, chewy coconut filling often tinted a festive pink or red.\nA heritage of Caribbean, Creole, and British baking traditions, these tarts reflect Belize’s diverse, colorful spirit.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1/3 cup sugar",
+      "1 egg",
+      "1 cup grated coconut",
+      "1/2 cup evaporated milk",
+      "1 tsp vanilla",
+      "1/4 tsp nutmeg"
+    ],
     "instructions": [
       "Make the pastry: Combine flour, sugar, salt. Cut in butter until mixture resembles coarse crumbs.",
       "Add cold water slowly until dough just comes together. Wrap and chill 30 minutes.",
@@ -872,7 +906,16 @@
     "language": "",
     "flagFunFact": "Bosnia and Herzegovina’s flag features blue and yellow with white stars along a diagonal line, symbolizing Europe, peace, and the country’s many cultures living side by side.",
     "culturalNote": "Hurmašice are Bosnia’s beloved syrup-soaked cookies—rich, tender, and irresistibly sweet.\nThey’re shaped into ridged ovals, baked until golden, then drenched in warm sugar syrup so they soak up every drop.\nA must-have at Eid, weddings, family gatherings, and especially birthdays, Hurmašice bring people together around the coffee table, where stories flow as easily as the syrup.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1/2 cup sugar",
+      "2 eggs",
+      "1 tsp baking powder",
+      "1/4 cup chopped walnuts",
+      "1 cup sugar syrup",
+      "1 tsp lemon juice"
+    ],
     "instructions": [
       "Make the syrup first: Combine sugar, water, and lemon juice in a pan. Bring to a gentle boil. Simmer ~10 minutes. Cool slightly.",
       "Preheat oven to 175°C (350°F). Line baking tray with parchment.",
@@ -1257,7 +1300,16 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Named after the city of Nanaimo in British Columbia, these no-bake layered bars are a Canadian classic for birthdays, bake sales, and holidays.",
-    "ingredients": [],
+    "ingredients": [
+      "1 cup graham cracker crumbs",
+      "1/2 cup shredded coconut",
+      "1/4 cup cocoa powder",
+      "1/2 cup butter",
+      "1/4 cup sugar",
+      "1 egg",
+      "1/2 cup custard filling",
+      "1/2 cup chocolate"
+    ],
     "instructions": [
       "Mix base ingredients and press into pan. Chill.",
       "Beat middle layer until fluffy; spread over base. Chill.",
@@ -2737,9 +2789,23 @@
     "flagFunFact": "",
     "culturalNote": "A festive treat for birthdays and holidays—sweet bread with red coconut filling sliced into cookies.",
     "ingredients": [
-      "Dough: 2 cups flour, 1/2 cup sugar, 1/4 cup butter, 1 egg, 1/2 cup milk",
-      "Filling: 1 cup grated coconut, 1/2 cup sugar, red food coloring"
-    ],
+  "Dough:",
+  "2 cups flour",
+  "1/4 cup sugar",
+  "1/4 cup butter",
+  "1 egg",
+  "1/2 cup milk",
+  "1 tsp yeast or baking powder",
+  "Pinch salt",
+  "Filling:",
+  "1 cup grated coconut",
+  "1/2 cup sugar",
+  "1/2 tsp vanilla",
+  "Pink food coloring",
+  "Icing (optional):",
+  "1/2 cup powdered sugar",
+  "1–2 tbsp water or milk"
+],
     "instructions": [
       "Make soft dough.",
       "Mix coconut filling.",
@@ -3025,10 +3091,18 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Eid, birthdays, weddings—all marked with Kleicha. Filled with date paste, fragrant with cardamom.",
-    "ingredients": [
-      "Dough: 2 cups flour, 1/2 cup butter, 1/4 cup milk, 1 tbsp sugar, pinch salt, 1 tsp yeast",
-      "Filling: 1 cup date paste, 1 tsp cardamom"
-    ],
+   "ingredients": [
+     "Dough:",
+     "2 cups flour",
+     "1/2 cup butter",
+     "1/4 cup milk",
+     "1 tbsp sugar",
+     "Pinch salt",
+     "1 tsp yeast",
+     "Filling:",
+     "1 cup date paste",
+     "1 tsp cardamom"
+],
     "instructions": [
       "Mix dough ingredients, let rise.",
       "Roll dough, spread filling.",
@@ -3168,7 +3242,16 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "A staple at Jamaican parties and bakeries. Sweet, spiced coconut filling in a crisp shell—perfect for birthdays and celebrations.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1 cup grated coconut",
+      "1/2 cup brown sugar",
+      "1/2 tsp ginger",
+      "1/4 tsp nutmeg",
+      "1 tsp vanilla",
+      "Pinch salt"
+    ],
     "instructions": [
       "Make pastry dough, chill.",
       "Roll, cut circles, shape into tart shells.",
@@ -5243,7 +5326,14 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Ghraiba is loved throughout the Gulf, including Qatar. Soft, melt-in-the-mouth, elegantly simple—served at Eid, weddings, and birthdays.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1 cup butter",
+      "1/2 cup powdered sugar",
+      "1/2 tsp cardamom",
+      "1 tbsp pistachios",
+      "Pinch salt"
+    ],
     "instructions": [
       "Cream ghee/butter and sugar.",
       "Add flour and salt to form soft dough.",
@@ -5789,7 +5879,14 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Essential for Lunar New Year and birthdays. Sweet-tart pineapple jam meets buttery, melt-in-mouth pastry.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "3/4 cup butter",
+      "1/3 cup powdered sugar",
+      "1 egg",
+      "2 tbsp cornstarch",
+      "1 cup pineapple jam"
+    ],
     "instructions": [
       "Cream butter, sugar, yolks, vanilla.",
       "Add flour to form soft dough.",
@@ -5964,7 +6061,15 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "A classic South African treat. Shortcrust base, sweet apricot jam, coconut meringue top—beloved at birthdays and teas.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1/2 cup sugar",
+      "2 eggs",
+      "1 tsp baking powder",
+      "1/2 cup apricot jam",
+      "1/2 cup shredded coconut"
+    ],
     "instructions": [
       "Make pastry, chill, line mini tart pans.",
       "Add teaspoon of jam in each.",
@@ -6315,7 +6420,14 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Taiwan’s iconic pineapple cakes are gifted for Lunar New Year, weddings, and birthdays. Buttery pastry, tangy-sweet filling—symbol of prosperity.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1 egg",
+      "1/2 cup powdered sugar",
+      "2 tbsp milk powder",
+      "1 cup pineapple filling"
+    ],
     "instructions": [
       "Make pineapple jam filling, cool.",
       "Cream butter, sugar, yolk.",
@@ -6810,7 +6922,15 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Traditional at Eid, weddings, and birthdays. Fragrant with cardamom, rich with dates—a symbol of Arabian hospitality.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1/4 cup milk",
+      "1 tsp yeast",
+      "1/2 cup date paste",
+      "1/2 tsp cardamom",
+      "1 tbsp sesame seeds"
+    ],
     "instructions": [
       "Mix dough ingredients to soft, pliable dough.",
       "Roll, fill with date paste, shape spirals or pillows.",
@@ -7122,7 +7242,16 @@
     "language": "",
     "flagFunFact": "",
     "culturalNote": "Essential for Eid, weddings, birthdays. Fragrant with cardamom and cloves, filled with sweet dates—a true celebration of hospitality.",
-    "ingredients": [],
+    "ingredients": [
+      "2 cups flour",
+      "1/2 cup butter",
+      "1/4 cup sugar",
+      "1 egg",
+      "1 tsp yeast",
+      "1 tbsp sesame seeds",
+      "1/2 tsp anise",
+      "1/4 cup milk"
+    ],
     "instructions": [
       "Mix dough ingredients.",
       "Roll, fill with spiced dates.",
